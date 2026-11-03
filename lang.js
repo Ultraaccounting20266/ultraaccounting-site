@@ -129,7 +129,7 @@ var BN={
 "Shift, stock, ledger":"শিফট, স্টক, লেজার",
 "Custom Software":"কাস্টম সফটওয়্যার",
 "Court, school, office":"কোর্ট, স্কুল, অফিস",
-"From ₹15,000":"₹১৫,০০০ থেকে",
+"From ₹15,000":"₹15,000 থেকে",
 "Maintenance & support: ₹299 – ₹499 per month":"রক্ষণাবেক্ষণ ও সাপোর্ট: মাসে ₹২৯৯ – ₹৪৯৯",
 "Domain (.in / .com) and fast hosting at actual cost":"ডোমেইন (.in / .com) আর ফাস্ট হোস্টিং আসল খরচে",
 "50% advance, 50% on delivery · 1 month free support":"৫০% অগ্রিম, ৫০% ডেলিভারিতে · ১ মাস ফ্রি সাপোর্ট",

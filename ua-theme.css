@@ -60,7 +60,7 @@ body { background:
 
 /* Steps */
 .step { background: #fff; border-radius: 18px; padding: 18px 20px; box-shadow: 0 8px 22px rgba(10,36,75,.07); }
-.step__num { color: #fff !important; background: linear-gradient(135deg, var(--ua-blue), var(--ua-navy)); width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; }
+.step__num { color: #fff !important; background: linear-gradient(135deg, var(--ua-blue), var(--ua-navy)); width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font: 700 16px/1 var(--sans) !important; letter-spacing: 0; margin: 0; }
 
 /* Checklist */
 .checklist li { background: #fff; border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; box-shadow: 0 4px 14px rgba(10,36,75,.06); border: 0 !important; }
@@ -83,7 +83,7 @@ body { background:
 }
 
 /* Contact & footer */
-.x-contact { background: linear-gradient(135deg, var(--ua-navy), var(--ua-navy-2)); color: #fff; border-radius: 24px; padding: 26px; box-shadow: 0 20px 50px rgba(10,36,75,.3); }
+.x-contact { background: linear-gradient(135deg, var(--ua-navy), var(--ua-navy-2)) !important; color: #fff !important; border-radius: 24px; padding: 26px; box-shadow: 0 20px 50px rgba(10,36,75,.3); }
 .x-contact .link { color: var(--ua-gold); }
 .x-contact .x-brand img { background: #fff; padding: 4px; }
 .foot { background: var(--ua-navy); color: #dfe7f7; border-radius: 22px 22px 0 0; padding: 22px 20px; text-align: center; }
@@ -91,3 +91,6 @@ body { background:
 .foot .link { color: var(--ua-gold); font-weight: 700; }
 .foot nav a { background: rgba(255,255,255,.14) !important; color: #fff !important; }
 #langbtn { background: linear-gradient(135deg, var(--ua-gold), var(--ua-gold-2)) !important; color: #2a1600 !important; }
+
+.x-contact p, .x-contact b, .x-contact small { color: #fff !important; }
+.x-contact .link { color: var(--ua-gold) !important; }
