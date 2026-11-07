@@ -522,7 +522,7 @@ function nextField(el){const root=el.closest('.modal')||$('view')||document;let 
 document.addEventListener('keydown',e=>{if(e.key!=='Enter'||e.defaultPrevented||e.ctrlKey||e.altKey||e.isComposing)return;const t=e.target;if(!t||t.hasAttribute('onkeydown'))return;
  if(t.tagName==='SELECT'||(t.tagName==='INPUT'&&!/^(button|submit|checkbox|radio|file)$/.test(t.type))){e.preventDefault();nextField(t)}});
 function addTest(id){const t=D.tests.find(x=>x.id===id);if(!t)return;if(F.items.some(i=>i.tid===id)){toast(t.name+' is already added.',true);return}
- F.items.push({tid:id,n:t.name,r:t.rate,del:ymd()});F.tq='';const s=$('t_q');if(s){s.value='';s.focus()}drawRes();drawItems();calc()}
+ F.items.push({tid:id,n:t.name,r:t.rate,del:F.advDate||ymd()});F.tq='';const s=$('t_q');if(s){s.value='';s.focus()}drawRes();drawItems();calc()}
 function rmTest(i){F.items.splice(i,1);drawItems();calc()}
 function itemSet(i,k,v){F.items[i][k]=k==='r'?num(v):v;calc()}
 function itemOut(i,v){F.items[i].out=!!v;drawItems();calc()}
@@ -561,7 +561,7 @@ function drawBilling(){
    <label class="f">Booking no. (optional)<input value="${esc(F.bookingNo)}" oninput="fset('bookingNo',this.value)"></label>`:''}
   </div><div class="muted" style="margin-top:6px">● = visiting today</div>
  </div>
- ${hasLab(t)?`<div class="card"><h2>Tests</h2>
+ ${hasLab(t)?`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><h2 style="margin:0">Tests</h2><label style="background:#fff6d6;border:1px solid #e8c95a;border-radius:6px;padding:4px 8px;font-size:13px;font-weight:600">📅 Advance booking — test date: <input type="date" min="${ymd()}" value="${F.advDate||''}" style="width:150px;padding:2px 4px" onchange="setAdv(this.value)"> ${F.advDate?'<button class="btn l s" onclick="setAdv(\'\')">Clear</button>':''}</label></div>
   <input id="t_q" placeholder="Search test name, e.g. CBC, widal, USG, X-ray chest…" value="${esc(F.tq)}" oninput="F.tq=this.value;drawRes()" onkeydown="tkey(event)" autocomplete="off">
   <div class="pills" id="t_pills">${['Pathology','X-Ray','USG','Echo','ECG'].map(c=>`<button data-c="${c}" class="${F.tcat===c?'on':''}" onclick="pickCat('${c}')">${c}</button>`).join('')}</div>
   <div id="t_items" style="margin-top:8px"></div><div class="res" id="t_res"></div></div>`:''}${t==='LAB'?'</div>':''}
@@ -615,11 +615,13 @@ function saveBill(print){
 }
 
 /* ---------- advance bookings (test date later than bill date) ---------- */
+function setAdv(v){if(!F)return;F.advDate=v||'';F.items.forEach(it=>it.del=F.advDate||ymd());drawBilling()}
+function newAdv(){const v=($('adv_d')||{}).value;if(!v||v<=ymd())return toast('Choose a future test date first.',true);const t=allowedTypes();page='billing';F=newForm(t.includes('LAB')?'LAB':defType());F.advDate=v;render();window.scrollTo(0,0);toast('Advance booking for '+fd(v)+' — add patient and tests, take advance, Save.')}
 let ADV={past:false,q:''};
 function advRows(){const t=ymd();const r=[];D.bills.forEach(b=>{if(b.deleted)return;(b.items||[]).forEach(it=>{if(it.del&&it.del>b.billDate&&(ADV.past||it.del>=t))r.push({b,it})})});return r.sort((x,y)=>x.it.del<y.it.del?-1:x.it.del>y.it.del?1:x.b.ts-y.b.ts)}
 function advToday(){try{const t=ymd();return D.bills.filter(b=>!b.deleted&&(b.items||[]).some(it=>it.del===t&&it.del>b.billDate)).length}catch(e){return 0}}
 views.advbook=function(){
- $('view').innerHTML=`<div class="card"><p style="margin-top:0">To book a test for a later date: make the bill now, set that test's <b>Delivery date</b> to the test day, enter the advance in Paid and save. It shows here date-wise. On the day, use <b>Receive due</b>.</p><div class="row">
+ $('view').innerHTML=`<div class="card"><div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-bottom:10px"><label class="f">Test date<input type="date" id="adv_d" min="${ymd()}"></label><button class="btn g" onclick="newAdv()">+ New advance booking</button></div><p style="margin-top:0">To book a test for a later date: make the bill now, set that test's <b>Delivery date</b> to the test day, enter the advance in Paid and save. It shows here date-wise. On the day, use <b>Receive due</b>.</p><div class="row">
  <label class="f">Search<input value="${esc(ADV.q)}" placeholder="Name / phone / test" oninput="ADV.q=this.value;drawAdv()"></label>
  <label style="display:flex;align-items:center;gap:6px;margin-top:18px;cursor:pointer"><input type="checkbox" style="width:16px;height:16px" ${ADV.past?'checked':''} onchange="ADV.past=this.checked;drawAdv()"> Show past bookings too</label></div></div><div class="card"><div id="advtable"></div></div>`;drawAdv()}
 function drawAdv(){const el=$('advtable');if(!el)return;const q=ADV.q.trim().toLowerCase(),t=ymd();
