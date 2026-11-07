@@ -1262,21 +1262,21 @@ function formF(billId){const b=D.bills.find(x=>x.id===billId);if(!b)return;const
 function ffPrint(){const b=FFB.b,f=FFB.ff;f.docId=$('ff_doc')?$('ff_doc').value:'';['decl','proc','conv','convOn','mtp','res','other'].forEach(k=>f[k]=$('ff_'+k).value.trim());f.ind=[...document.querySelectorAll('.ffi')].filter(x=>x.checked).map(x=>+x.value);f.preg=true;
  put('bills',Object.assign({},b,{ff:f}));log('Form F print',b.no,b.name);closeModal();printHTML(formFHTML(b,f),'report')}
 function formFHTML(b,f){const dc=D.signers.find(s=>s.id===f.docId),u=x=>`<span style="border-bottom:1px dotted #000;padding:0 4px">${esc(x||'')||'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'}</span>`,L=(n,t,v)=>`<div style="margin:3px 0">${n}. ${t} ${u(v)}</div>`;
- const ref=b.refId||b.doctorId?(b.doctorName+(b.doctorDeg?', '+b.doctorDeg:'')):'';const wk=f.lmp?fd(f.lmp)+' ('+ffWeeks(f.lmp,f.proc||b.billDate)+')':'';
+ const rfo=b.refId&&D.referrers?D.referrers.find(x=>x.id===b.refId):null,dno=b.doctorName&&!/^self$/i.test(String(b.doctorName).trim())?String(b.doctorName).trim():'',ref=dno?(dno+(b.doctorDeg?', '+b.doctorDeg:'')+(rfo&&rfo.phone?', Ph: '+rfo.phone:'')):'';const wk=f.lmp?fd(f.lmp):'';const pn=(/^mr\.?$/i.test(String(b.title||'').trim())?'':(b.title?b.title+' ':''))+b.name;
  const sig=`<div style="display:flex;justify-content:space-between;margin-top:22px"><div>Date: ${u(fd(f.proc||b.billDate))}<br>Place: ${u('Chanchal, Malda')}</div><div style="text-align:center;min-width:260px"><div style="height:42px"></div><b>${esc(dc?dc.name:'')}</b><br>${esc(dc?dc.deg||'':'')}${dc&&dc.reg?'<br>'+esc(dc.reg):''}<div style="font-size:10px">Name, Signature and Registration Number with Seal of the Gynaecologist/Radiologist/Registered Medical Practitioner performing Diagnostic Procedure/s</div></div></div>`;
  return `<div style="font-family:Arial,sans-serif;font-size:11.5px;line-height:1.35;color:#000;padding:4mm 6mm">
  <div style="text-align:center"><b style="font-size:15px">FORM \u2013 F</b><br>[See proviso to Section 4(3), rule 9(4) and rule 10(1A)]<br><b>FORM FOR MAINTENANCE OF RECORD IN CASE OF PRENATAL DIAGNOSTIC TEST / PROCEDURE BY GENETIC CLINIC / ULTRASOUND CLINIC / IMAGING CENTRE</b></div>
  <div style="font-weight:700;margin-top:6px;text-decoration:underline">SECTION A: To be filled in for all Diagnostic Procedures/Tests</div>
  ${L(1,'Name and complete address of Genetic Clinic/Ultrasound Clinic/Imaging Centre:',S.clinicName+' '+S.sub+', '+(S.ffAddr||S.addr||''))}
  ${L(2,'Registration No. (Under PC&amp;PNDT Act, 1994):',S.pndtReg||'')}
- <div style="margin:3px 0">3. Patient\u2019s name ${u(b.title+' '+b.name)} Age ${u(ageTxt(b.age))}</div>
+ <div style="margin:3px 0">3. Patient\u2019s name ${u(pn)} Age ${u(ageTxt(b.age))}</div>
  ${L(4,'Total Number of living children:',f.lc===''||f.lc==null?'':f.lc)}
  <div style="margin:3px 0 3px 16px">a) Number of living Sons with age of each living son (in years or months): ${u((f.sn||'0')+(f.sa?' \u2014 '+f.sa:''))}</div>
  <div style="margin:3px 0 3px 16px">b) Number of living Daughters with age of each living daughter (in years or months): ${u((f.dn||'0')+(f.da?' \u2014 '+f.da:''))}</div>
  ${L(5,'Husband\u2019s/Wife\u2019s/Father\u2019s/Mother\u2019s Name:',b.guardian||'')}
  ${L(6,'Full postal address of the patient with Contact Number, if any:',[b.addr,b.phone].filter(Boolean).join(', '))}
- ${L('7 (a)','Referred by (Full name and address of Doctor(s)/ Genetic Counselling Centre):',ref||'N/A')}
- ${L('&nbsp;&nbsp;&nbsp;(b)','Self-Referral by Gynaecologists/Radiologists/Registered Medical Practitioner conducting the diagnostic procedures:',ref?'N/A':'')}
+ ${L('7 (a)','Referred by (Full name and address of Doctor(s)/ Genetic Counselling Centre):',ref)}
+ ${L('&nbsp;&nbsp;&nbsp;(b)','Self-Referral by Gynaecologists/Radiologists/Registered Medical Practitioner conducting the diagnostic procedures:','')}
  ${L(8,'Last menstrual period or weeks of pregnancy:',wk)}
  <div style="font-weight:700;margin-top:6px;text-decoration:underline">SECTION B: To be filled in for performing non-invasive diagnostic Procedures/Tests only</div>
  ${L(9,'Name of the doctor performing the procedure/s:',dc?dc.name:'')}
@@ -1292,12 +1292,12 @@ function formFHTML(b,f){const dc=D.signers.find(s=>s.id===f.docId),u=x=>`<span s
  <div style="font-weight:700;margin-top:6px;text-decoration:underline">SECTION C: To be filled for performing invasive Procedures/Tests only</div><div>Not Applicable (no invasive procedure performed).</div>
  <div style="page-break-before:always"></div>
  <div style="font-weight:700;text-align:center;margin-top:4px;text-decoration:underline">SECTION D: DECLARATION OF THE PERSON UNDERGOING PRE-NATAL DIAGNOSTIC TEST/PROCEDURE</div>
- <p>I, Mrs./Mr. ${u(b.title+' '+b.name)} declare that by undergoing ${u('Ultrasonography')} Pre-Natal diagnostic test/procedure, I do not want to know the sex of my foetus.</p>
+ <p>I, Mrs./Mr. ${u(pn)} declare that by undergoing ${u('Ultrasonography')} Pre-Natal diagnostic test/procedure, I do not want to know the sex of my foetus.</p>
  <div style="display:flex;justify-content:space-between;margin-top:26px"><div>Date: ${u(fd(f.decl))}</div><div style="text-align:center">______________________________<br>Signature / thumb impression of the person undergoing the pre-natal Diagnostic Test/procedure</div></div>
  <p style="margin-top:14px">In case of thumb impression: Identified by (name) ____________________ age ______ sex ______ Relation (if any) ______________ address and contact no. ________________________________</p>
  <p>Signature of the person attesting thumb impression ______________________ date ____________</p>
  <div style="font-weight:700;text-align:center;margin-top:16px;text-decoration:underline">DECLARATION OF DOCTOR/PERSON CONDUCTING PRE NATAL DIAGNOSTIC PROCEDURE/TEST</div>
- <p>I, ${u(dc?dc.name:'')} (name of the person conducting ultrasonography/image scanning) declare that while conducting ultrasonography/image scanning on Ms./Mr. ${u(b.title+' '+b.name)} (name of the pregnant woman or the person undergoing pre natal diagnostic procedure/test), I have neither detected nor disclosed the sex of her fetus to anybody in any manner.</p>
+ <p>I, ${u(dc?dc.name:'')} (name of the person conducting ultrasonography/image scanning) declare that while conducting ultrasonography/image scanning on Ms./Mr. ${u(pn)} (name of the pregnant woman or the person undergoing pre natal diagnostic procedure/test), I have neither detected nor disclosed the sex of her fetus to anybody in any manner.</p>
  <div style="display:flex;justify-content:space-between;margin-top:30px"><div>Date: ${u(fd(f.proc))}</div><div style="text-align:center;min-width:280px">Signature: ______________________<br><b>${esc(dc?dc.name.toUpperCase():'')}</b>${dc&&dc.reg?' \u00b7 '+esc(dc.reg):''}<div style="font-size:10px">Name in Capitals, Registration Number with Seal of the Gynaecologist/Radiologist/Registered Medical Practitioner Conducting Diagnostic procedure</div></div></div>
  <div style="font-size:10px;margin-top:10px">Patient ID: ${esc(b.pno||'')} \u00b7 Bill No: ${esc(b.no||'')}</div></div>`}
 
