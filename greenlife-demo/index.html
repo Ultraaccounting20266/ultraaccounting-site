@@ -618,8 +618,8 @@ function saveBill(print){
 function setAdv(v){if(!F)return;F.advDate=v||'';F.items.forEach(it=>it.del=F.advDate||ymd());drawBilling()}
 function newAdv(){const v=($('adv_d')||{}).value;if(!v||v<=ymd())return toast('Choose a future test date first.',true);const t=allowedTypes();page='billing';F=newForm(t.includes('LAB')?'LAB':defType());F.advDate=v;render();window.scrollTo(0,0);toast('Advance booking for '+fd(v)+' — add patient and tests, take advance, Save.')}
 let ADV={past:false,q:''};
-function advRows(){const t=ymd();const r=[];D.bills.forEach(b=>{if(b.deleted)return;(b.items||[]).forEach(it=>{if(it.del&&it.del>b.billDate&&(ADV.past||it.del>=t))r.push({b,it})})});return r.sort((x,y)=>x.it.del<y.it.del?-1:x.it.del>y.it.del?1:x.b.ts-y.b.ts)}
-function advToday(){try{const t=ymd();return D.bills.filter(b=>!b.deleted&&(b.items||[]).some(it=>it.del===t&&it.del>b.billDate)).length}catch(e){return 0}}
+function advRows(){const t=ymd();const r=[];D.bills.forEach(b=>{if(b._del)return;(b.items||[]).forEach(it=>{if(it.del&&it.del>b.billDate&&(ADV.past||it.del>=t))r.push({b,it})})});return r.sort((x,y)=>x.it.del<y.it.del?-1:x.it.del>y.it.del?1:x.b.ts-y.b.ts)}
+function advToday(){try{const t=ymd();return D.bills.filter(b=>!b._del&&(b.items||[]).some(it=>it.del===t&&it.del>b.billDate)).length}catch(e){return 0}}
 views.advbook=function(){
  $('view').innerHTML=`<div class="card"><div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-bottom:10px"><label class="f">Test date<input type="date" id="adv_d" min="${ymd()}"></label><button class="btn g" onclick="newAdv()">+ New advance booking</button></div><p style="margin-top:0">To book a test for a later date: make the bill now, set that test's <b>Delivery date</b> to the test day, enter the advance in Paid and save. It shows here date-wise. On the day, use <b>Receive due</b>.</p><div class="row">
  <label class="f">Search<input value="${esc(ADV.q)}" placeholder="Name / phone / test" oninput="ADV.q=this.value;drawAdv()"></label>
