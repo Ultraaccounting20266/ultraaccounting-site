@@ -449,6 +449,7 @@ function render(){
 const myBills=()=>{const a=D.bills.filter(b=>!b._del);if(!ME)return a;const r=myRole();if(r==='doctor')return a.filter(b=>b.doctorId===ME.doctorId);if(r==='admin')return a;
  const dp=can('opd')||can('combined')||can('tokens'),lp=can('lab')||can('combined')||can('report');
  return a.filter(b=>(b.type==='OPD'&&dp)||(b.type==='LAB'&&lp)||(b.type==='COMBINED'&&(dp||lp)))};
+function collByMode(from,to,list){const r={Cash:0,'UPI / QR':0,Card:0};(list||D.bills).forEach(b=>{if(b._del)return;(b.pays||[]).forEach(p=>{if(p.d>=from&&p.d<=to){const m=p.m||b.mode||'Cash';r[m]=(r[m]||0)+p.a}})});return r}
 function collection(from,to){let s=0;D.bills.forEach(b=>{if(b._del)return;(b.pays||[]).forEach(p=>{if(p.d>=from&&p.d<=to)s+=p.a})});return s}
 views.dashboard=function(){
  const td=ymd(),B=myBills().filter(b=>b.billDate===td);
@@ -470,7 +471,7 @@ views.dashboard=function(){
  const recent=B.sort((a,b)=>b.ts-a.ts).slice(0,8);
  $('view').innerHTML=ban+`
  <div class="stats"><div class="stat s1"><b>${pts}</b><span>Total patients today</span></div><div class="stat s2"><b>${opd.length}</b><span>OPD bills today</span></div><div class="stat s3"><b>${lab.length}</b><span>Lab / pathology bills today</span></div>${can('tokens')?`<div class="stat" style="background:#7b3fa0;cursor:pointer" onclick="nav('tokens')"><b>${tkCount()}</b><span>Unpaid tokens waiting</span></div>`:''}
- ${isAdmin()?`<div class="stat s4"><b>₹ ${inr(collection(td,td))}</b><span>Total collection today</span></div><div class="stat s5"><b>${newP}</b><span>New patients today</span></div><div class="stat s6"><b>${opd.length}</b><span>New appointments today</span></div>`:`<div class="stat s5"><b>${newP}</b><span>New patients today</span></div>`}</div>
+ ${isAdmin()?`<div class="stat s4"><b>₹ ${inr(collection(td,td))}</b><span>Total collection today</span></div>${(()=>{const c=collByMode(td,td);return `<div class="stat s2"><b style="font-size:18px">Cash ₹ ${inr(c.Cash)}<br>UPI ₹ ${inr(c['UPI / QR'])}${c.Card?'<br>Card ₹ '+inr(c.Card):''}</b><span>Collection today by mode</span></div>`})()}<div class="stat s5"><b>${newP}</b><span>New patients today</span></div><div class="stat s6"><b>${opd.length}</b><span>New appointments today</span></div>`:`<div class="stat s5"><b>${newP}</b><span>New patients today</span></div>`}</div>
  ${isAdmin()?`<div class="stats"><div class="stat" style="background:#2f6f55"><b>₹ ${inr(opdInc)}</b><span>OPD fees billed today</span></div><div class="stat" style="background:#3d5fa8"><b>₹ ${inr(labInc)}</b><span>Lab income billed today</span></div><div class="stat" style="background:#9a3b32"><b>₹ ${inr(dueT)}</b><span>Due created today</span></div></div>`:''}
  ${allowedTypes().length?`<div class="acts">${allowedTypes().includes('OPD')?'<button class="btn g" onclick="startBill(\'OPD\')">OPD Slip</button>':''}${allowedTypes().includes('LAB')?'<button class="btn" onclick="startBill(\'LAB\')">Lab Bill</button>':''}${allowedTypes().includes('COMBINED')?'<button class="btn o" onclick="startBill(\'COMBINED\')">OPD + Lab Bill</button>':''}${can('tokens')?`<button class="btn" style="background:#7b3fa0" onclick="nav('tokens')">Token Bookings${tkCount()?' ('+tkCount()+')':''}</button>`:''}<button class="btn l" onclick="nav('patients')">Find Patient</button></div>`:''}
  <div class="g3"><div>${perDoc}<div class="card"><h2>Recent bills today</h2>${recent.length?`<div class="tw"><table><tr><th>Time</th><th>Patient</th><th>Bill No.</th><th>Type</th><th class="n">Amount</th></tr>${recent.map(b=>`<tr><td>${ftShort(b.ts)}</td><td>${esc(b.title)} ${esc(b.name)}</td><td>${esc(b.no)}</td><td>${typeTag(b.type,b)}</td><td class="n">₹ ${inr(b.total)}</td></tr>`).join('')}</table></div>`:'<div class="em">No bills yet today. Start with “New Bill”.</div>'}</div></div>
@@ -597,13 +598,13 @@ function saveBill(print){
  if(F.edit){
   const old=D.bills.find(x=>x.id===F.edit);if(!old)return toast('Original bill not found.',true);
   b=Object.assign({},old,snap);b.bookingNo=F.bookingNo||old.bookingNo;
-  const oldPaid=old.paid;b.pays=(old.pays||[]).slice();if(paid!==oldPaid)b.pays.push({d:today,a:paid-oldPaid,adj:1});
+  const oldPaid=old.paid;b.pays=(old.pays||[]).slice();if(paid!==oldPaid)b.pays.push({d:today,a:paid-oldPaid,adj:1,m:F.mode||'Cash'});
   b.paid=paid;b.due=T.net-paid;
   if((old.agentId||'')!==b.agentId){delete b.agentCommPaidOn;delete b.agentCommPaidBy}
   log('Edit bill',b.no,`total ${inr(old.total)}→${inr(T.net)}, paid ${inr(oldPaid)}→${inr(paid)}${old.name!==b.name?', name changed':''}${(old.agentId||'')!==b.agentId?', agent '+(old.agentName||'none')+'→'+(b.agentName||'none'):''}${(old.refId||'')!==(b.refId||'')?', referrer changed':''}`);
  }else{
   const _pre=`${S.billPrefix}-${S.dev}-${t==='OPD'?'OPD':t==='LAB'?'PT':'CB'}-`;const no=_pre+nextBillSeq(t,_pre);
-  b=Object.assign({id:uid(),no,bookingNo:F.bookingNo||no,billDate:today,ts:Date.now(),createdBy:ME.name,newPt,pays:paid>0?[{d:today,a:paid}]:[],paid,due:T.net-paid},snap);
+  b=Object.assign({id:uid(),no,bookingNo:F.bookingNo||no,billDate:today,ts:Date.now(),createdBy:ME.name,newPt,pays:paid>0?[{d:today,a:paid,m:F.mode||'Cash'}]:[],paid,due:T.net-paid},snap);
   log('Create bill',no,`${typeName(t)} · ₹${inr(T.net)}${newPt?' · new patient':''}`);
  }
  put('bills',b);
@@ -630,7 +631,7 @@ function drawAdv(){const el=$('advtable');if(!el)return;const q=ADV.q.trim().toL
  let last='';el.innerHTML=`<div class="tw"><table><tr><th>Test date</th><th>Patient</th><th>Test</th><th>Bill No.</th><th class="n">Paid</th><th class="n">Due</th><th></th></tr>${a.map(({b,it})=>{const d=it.del!==last;last=it.del;return `<tr${it.del===t?' style="background:#fff6d6"':''}><td>${d?'<b>'+fd(it.del)+'</b>'+(it.del===t?' <span class="chip">Today</span>':''):''}</td><td>${esc(b.title||'')} ${esc(b.name)}<br><span class="muted">${esc(b.phone||'')}</span></td><td>${esc(it.n)}</td><td>${esc(b.no)}<br><span class="muted">booked ${fd(b.billDate)}</span></td><td class="n">${inr(b.paid)}</td><td class="n ${b.due>0?'due':''}">${inr(b.due)}</td><td style="white-space:nowrap"><button class="btn s" onclick="viewBill('${b.id}')">View / Print</button>${b.due>0?` <button class="btn o s" onclick="payDue('${b.id}')">Receive due</button>`:''}</td></tr>`}).join('')}</table></div>`}
 
 /* ---------- bills list ---------- */
-function resetBF(){BF={from:ymd(),to:ymd(),type:'',doc:'',q:'',due:false}}
+function resetBF(){BF={from:ymd(),to:ymd(),type:'',doc:'',q:'',due:false,mode:''}}
 views.bills=function(){
  if(!BF.from)resetBF();
  $('view').innerHTML=`<div class="card"><div class="row">
@@ -638,6 +639,7 @@ views.bills=function(){
  <label class="f">To<input type="date" value="${BF.to}" onchange="BF.to=this.value;drawBills()"></label>
  <label class="f">Type<select onchange="BF.type=this.value;drawBills()"><option value="">All</option><option value="OPD"${BF.type==='OPD'?' selected':''}>OPD</option><option value="LAB"${BF.type==='LAB'?' selected':''}>Lab</option><option value="COMBINED"${BF.type==='COMBINED'?' selected':''}>OPD + Lab</option>${['USG','X-Ray','Echo','ECG'].map(k=>`<option value="K:${k}"${BF.type==='K:'+k?' selected':''}>${k}</option>`).join('')}</select></label>
  ${myRole()!=='doctor'?`<label class="f">Doctor<select onchange="BF.doc=this.value;drawBills()"><option value="">All</option>${D.doctors.map(d=>`<option value="${d.id}"${BF.doc===d.id?' selected':''}>${esc(d.name)}</option>`).join('')}</select></label>`:''}
+ <label class="f">Payment mode<select onchange="BF.mode=this.value;drawBills()"><option value="">All</option>${['Cash','UPI / QR','Card'].map(x=>`<option${BF.mode===x?' selected':''}>${x}</option>`).join('')}</select></label>
  <label class="f" style="flex:1;min-width:180px">Search<input value="${esc(BF.q)}" placeholder="Name, phone, bill no." oninput="BF.q=this.value;drawBills()"></label>
  <label class="f"><span><input type="checkbox" ${BF.due?'checked':''} onchange="BF.due=this.checked;drawBills()">Only with due</span></label>
  <button class="btn l s" onclick="resetBF();views.bills()">Today</button><button class="btn l s" onclick="BF.from='2000-01-01';BF.to='2999-12-31';views.bills()">All dates</button></div></div>
@@ -646,11 +648,11 @@ views.bills=function(){
 };
 function drawBills(){
  const q=BF.q.trim().toLowerCase();
- const a=myBills().filter(b=>b.billDate>=BF.from&&b.billDate<=BF.to&&(!BF.type||(BF.type.startsWith('K:')?billCats(b).includes(BF.type.slice(2)):(BF.type==='LAB'?(b.type==='LAB'||b.type==='COMBINED')&&billCats(b).includes('Lab'):b.type===BF.type)))&&(!BF.doc||b.doctorId===BF.doc)&&(!BF.due||b.due>0)&&(!q||(b.name+' '+(b.phone||'')+' '+b.no+' '+b.pno).toLowerCase().includes(q))).sort((x,y)=>y.ts-x.ts);
+ const a=myBills().filter(b=>b.billDate>=BF.from&&b.billDate<=BF.to&&(!BF.type||(BF.type.startsWith('K:')?billCats(b).includes(BF.type.slice(2)):(BF.type==='LAB'?(b.type==='LAB'||b.type==='COMBINED')&&billCats(b).includes('Lab'):b.type===BF.type)))&&(!BF.doc||b.doctorId===BF.doc)&&(!BF.due||b.due>0)&&(!BF.mode||(b.mode||'Cash')===BF.mode)&&(!q||(b.name+' '+(b.phone||'')+' '+b.no+' '+b.pno).toLowerCase().includes(q))).sort((x,y)=>y.ts-x.ts);
  const el=$('btable');if(!el)return;
  if(!a.length){el.innerHTML='<div class="em">No bills found for these filters.</div>';return}
  const sum=a.reduce((s,b)=>({t:s.t+b.total,p:s.p+b.paid,d:s.d+b.due}),{t:0,p:0,d:0});
- el.innerHTML=`<div class="muted" style="margin-bottom:6px">${a.length} bills${a.length>400?' (showing latest 400)':''} · Total ₹ ${inr(sum.t)} · Paid ₹ ${inr(sum.p)} · Due ₹ ${inr(sum.d)}</div><div class="tw"><table><tr><th>Bill No.</th><th>Date / time</th><th>Patient</th><th>Doctor</th><th>Type</th><th class="n">Total</th><th class="n">Paid</th><th class="n">Due</th><th></th></tr>
+ el.innerHTML=`<div class="muted" style="margin-bottom:6px">${a.length} bills${a.length>400?' (showing latest 400)':''} · Total ₹ ${inr(sum.t)} · Paid ₹ ${inr(sum.p)} · Due ₹ ${inr(sum.d)}${(()=>{const c=collByMode(BF.from,BF.to,a);return ` <br><b>Received in these dates:</b> Cash ₹ ${inr(c.Cash)} · UPI ₹ ${inr(c['UPI / QR'])}${c.Card?' · Card ₹ '+inr(c.Card):''}`})()}</div><div class="tw"><table><tr><th>Bill No.</th><th>Date / time</th><th>Patient</th><th>Doctor</th><th>Type</th><th class="n">Total</th><th class="n">Paid</th><th class="n">Due</th><th></th></tr>
  ${a.slice(0,400).map(b=>`<tr><td>${esc(b.no)}</td><td>${fd(b.billDate)}<br><span class="muted">${ftShort(b.ts)}</span></td><td>${esc(b.title)} ${esc(b.name)}<br><span class="muted">${esc(b.phone||'')}</span></td><td>${esc(b.doctorName)}${b.agentName?`<br><span class="muted">Agent: ${esc(b.agentName)}</span>`:''}</td><td>${typeTag(b.type,b)}</td><td class="n">${inr(b.total)}</td><td class="n">${inr(b.paid)}</td><td class="n ${b.due>0?'due':''}">${inr(b.due)}</td>
  <td style="white-space:nowrap"><button class="btn s" onclick="viewBill('${b.id}')">View / Print</button>${b.ff&&b.ff.preg?` <button class="btn s" style="background:#8e44ad" onclick="formF('${b.id}')">Form F</button>`:''}${b.due>0&&myRole()!=='doctor'?` <button class="btn o s" onclick="payDue('${b.id}')">Receive due</button>`:''}${isAdmin()?` <button class="btn l s" onclick="editBill('${b.id}')">Edit</button> <button class="btn r s" onclick="delBill('${b.id}')">Delete</button>`:''}</td></tr>`).join('')}</table></div>`;
 }
@@ -659,7 +661,7 @@ function viewBill(id){const b=D.bills.find(x=>x.id===id);if(!b)return;
  <div class="mfoot"><button class="btn l" onclick="closeModal()">Close</button>${b.doctorId?`<button class="btn" onclick="printBill(D.bills.find(x=>x.id==='${b.id}'),'slip')">Print appointment slip</button>`:''}${b.refId&&b.refPhone?`<button class="btn" style="background:#6b4fbb" onclick="waRef('${b.id}')">Message doctor</button>`:''}<button class="btn" style="background:#1da851" onclick="waBill('${b.id}')">WhatsApp Slip</button><button class="btn g" onclick="printBill(D.bills.find(x=>x.id==='${b.id}'),'receipt')">Print receipt</button></div>`,true);
 }
 function payDue(id){const b=D.bills.find(x=>x.id===id);if(!b)return;const v=prompt('Bill '+b.no+' — due ₹'+inr(b.due)+'\nAmount received now (₹):',b.due);if(v===null)return;const a=num(v);if(a<=0||a>b.due)return toast('Enter an amount between 1 and '+inr(b.due),true);
- const n=Object.assign({},b);n.pays=(b.pays||[]).concat([{d:ymd(),a}]);n.paid=b.paid+a;n.due=b.due-a;put('bills',n);log('Due received',b.no,'₹'+inr(a));toast('₹ '+inr(a)+' received.');
+ const pm=confirm('₹ '+inr(a)+' — received by UPI / QR?\n\nOK = UPI / QR\nCancel = Cash')?'UPI / QR':'Cash';const n=Object.assign({},b);n.pays=(b.pays||[]).concat([{d:ymd(),a,m:pm}]);n.paid=b.paid+a;n.due=b.due-a;put('bills',n);log('Due received',b.no,'₹'+inr(a));toast('₹ '+inr(a)+' received.');
  printBill(n,'receipt');if(page==='bills')drawBills();else render()}
 function editBill(id){const b=D.bills.find(x=>x.id===id);if(!b)return;
  F=Object.assign(newForm(b.type),{edit:b.id,editNo:b.no,pid:b.pid,title:b.title,name:b.name,age:b.age,sex:b.sex,weight:b.weight,phone:b.phone,guardian:b.guardian,doc:b.doctorId,refId:b.refId||'',fee:b.fee,apptDate:b.apptDate||ymd(),apptTime:b.apptTime||'',bookingNo:b.bookingNo,items:b.items.map(i=>Object.assign({},i)),disc:b.disc,paid:b.paid,paidT:true,mode:b.mode||'Cash',agentId:b.agentId||'',addr:b.addr||'',ff:Object.assign({preg:false,lc:'',sn:'',sa:'',dn:'',da:'',lmp:''},b.ff||{}),commTo:b.commTo||'auto',commOv:b.commOv??'',acommOv:b.acommOv??''});fillAge(F);
