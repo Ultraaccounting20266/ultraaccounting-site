@@ -614,6 +614,19 @@ function saveBill(print){
  if(print==='wa')waBill(b.id);else if(print==='wad')waRef(b.id);else if(print)printBill(b,t==='OPD'?'slip':'receipt');
 }
 
+/* ---------- advance bookings (test date later than bill date) ---------- */
+let ADV={past:false,q:''};
+function advRows(){const t=ymd();const r=[];D.bills.forEach(b=>{if(b.deleted)return;(b.items||[]).forEach(it=>{if(it.del&&it.del>b.billDate&&(ADV.past||it.del>=t))r.push({b,it})})});return r.sort((x,y)=>x.it.del<y.it.del?-1:x.it.del>y.it.del?1:x.b.ts-y.b.ts)}
+function advToday(){try{const t=ymd();return D.bills.filter(b=>!b.deleted&&(b.items||[]).some(it=>it.del===t&&it.del>b.billDate)).length}catch(e){return 0}}
+views.advbook=function(){
+ $('view').innerHTML=`<div class="card"><p style="margin-top:0">To book a test for a later date: make the bill now, set that test's <b>Delivery date</b> to the test day, enter the advance in Paid and save. It shows here date-wise. On the day, use <b>Receive due</b>.</p><div class="row">
+ <label class="f">Search<input value="${esc(ADV.q)}" placeholder="Name / phone / test" oninput="ADV.q=this.value;drawAdv()"></label>
+ <label style="display:flex;align-items:center;gap:6px;margin-top:18px;cursor:pointer"><input type="checkbox" style="width:16px;height:16px" ${ADV.past?'checked':''} onchange="ADV.past=this.checked;drawAdv()"> Show past bookings too</label></div></div><div class="card"><div id="advtable"></div></div>`;drawAdv()}
+function drawAdv(){const el=$('advtable');if(!el)return;const q=ADV.q.trim().toLowerCase(),t=ymd();
+ const a=advRows().filter(x=>!q||(x.b.name+' '+(x.b.phone||'')+' '+x.it.n+' '+x.b.no).toLowerCase().includes(q));
+ if(!a.length){el.innerHTML='<div class="em">No advance bookings.</div>';return}
+ let last='';el.innerHTML=`<div class="tw"><table><tr><th>Test date</th><th>Patient</th><th>Test</th><th>Bill No.</th><th class="n">Paid</th><th class="n">Due</th><th></th></tr>${a.map(({b,it})=>{const d=it.del!==last;last=it.del;return `<tr${it.del===t?' style="background:#fff6d6"':''}><td>${d?'<b>'+fd(it.del)+'</b>'+(it.del===t?' <span class="chip">Today</span>':''):''}</td><td>${esc(b.title||'')} ${esc(b.name)}<br><span class="muted">${esc(b.phone||'')}</span></td><td>${esc(it.n)}</td><td>${esc(b.no)}<br><span class="muted">booked ${fd(b.billDate)}</span></td><td class="n">${inr(b.paid)}</td><td class="n ${b.due>0?'due':''}">${inr(b.due)}</td><td style="white-space:nowrap"><button class="btn s" onclick="viewBill('${b.id}')">View / Print</button>${b.due>0?` <button class="btn o s" onclick="payDue('${b.id}')">Receive due</button>`:''}</td></tr>`}).join('')}</table></div>`}
+
 /* ---------- bills list ---------- */
 function resetBF(){BF={from:ymd(),to:ymd(),type:'',doc:'',q:'',due:false}}
 views.bills=function(){
@@ -936,6 +949,7 @@ function navItems(){const r=myRole(),a=[['dashboard','Dashboard']],t=allowedType
  if(can('tokens'))a.push(['tokens','Token Bookings']);
  if(can('report'))a.push(['labreports','Lab Reports']);
  if(can('bills'))a.push(['bills',r==='doctor'?'My Bills':'Bills']);
+ if(can('bills')&&r!=='doctor'){const n=advToday();a.push(['advbook','Advance Bookings'+(n?' ('+n+')':'')])}
  if(can('patients'))a.push(['patients','Patients']);
  if(r==='admin')a.push(['doctors','Doctors'],['referrers','Referring Doctors'],['agents','Agents'],['tests','Tests & Rates'],['signers','Report Signers'],['reports','Reports'],['users','Users']);
  if(can('commission'))a.push(['commission','Commission']);
