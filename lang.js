@@ -31,6 +31,7 @@ var BN={
 "Cloud sync across counters":"সব কাউন্টারে ক্লাউড সিঙ্ক",
 "Owner / manager / staff PINs":"মালিক / ম্যানেজার / স্টাফের আলাদা PIN",
 "Open live":"লাইভ খুলুন",
+"Try full demo":"পুরো ডেমো চালিয়ে দেখুন",
 "Smart Petrol Pump Software":"স্মার্ট পেট্রোল পাম্প সফটওয়্যার",
 "For petrol / diesel / CNG pumps":"পেট্রোল / ডিজেল / CNG পাম্পের জন্য",
 "Live at Amar Saha HP Petrol Pump":"চালু আছে অমর সাহা HP পেট্রোল পাম্পে",
