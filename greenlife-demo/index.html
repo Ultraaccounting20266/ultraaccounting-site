@@ -113,9 +113,9 @@ tr.del td{opacity:.45;text-decoration:line-through}
 .uacard{background:#fff;color:#223;border-radius:12px;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,.25)}
 .uacard .ua{font-size:22px;font-weight:800;color:#155a9c;letter-spacing:.3px}.uacard .ph{display:block;margin-top:10px;background:#1da851;color:#fff;text-align:center;border-radius:8px;padding:10px;font-size:17px;font-weight:700;text-decoration:none}
 .uasig{font-family:'Brush Script MT','Segoe Script',cursive;font-size:26px;color:#155a9c;margin-top:10px;border-top:1px dashed #c9d6e6;padding-top:6px}
-.lpan ul.feat{display:grid;grid-template-columns:1fr 1fr;gap:6px}.lpan ul.feat li{margin:0;padding:7px 9px;gap:7px}.lpan ul.feat li b{font-size:13px}.lpan ul.feat li small{font-size:11.5px;display:block;line-height:1.35}.lpan ul.feat li span.i{font-size:17px}
-@media(max-width:1200px){.lpan ul.feat{grid-template-columns:1fr}}
-@media(max-width:1000px){.lwrap{grid-template-columns:1fr;max-width:420px}.lwrap .box{order:-1;max-width:none}}
+.lpan ul.feat li{margin-bottom:7px;padding:8px 11px}.lpan ul.feat li small{display:block}
+.lmid{display:flex;flex-direction:column;gap:12px}.lmid .uacard{padding:12px 14px;font-size:12.5px}.lmid .uacard .ua{font-size:18px}.lmid .uacard .ph{font-size:15px;padding:7px;margin-top:8px}.lmid .uacard .uasig{font-size:20px;margin-top:6px}.lmid .uacard ul{display:none}
+@media(max-width:1000px){.lwrap{grid-template-columns:1fr;max-width:420px}.lwrap .lmid{order:-1}.lwrap .box{max-width:none}}
 .login .lg{display:flex;justify-content:center;margin-bottom:6px}
 .login .lg svg,.login .lg img{width:72px;height:72px;object-fit:contain}
 .login h1{font-size:19px;text-align:center;margin:4px 0 2px;color:var(--g)}
@@ -252,7 +252,7 @@ const billKind=b=>{if(!b||b.type==='OPD')return 'OPD';const k=billCats(b);const 
 const typeTag=(t,b)=>`<span class="tag ${t==='OPD'?'opd':t==='LAB'?'lab':'cmb'}">${b?esc(billKind(b)):typeName(t)}</span>`;
 const ageTxt=a=>/^\d+(\.\d+)?$/.test(String(a||'').trim())?String(a).trim()+' Years':String(a||'');
 /* v3: age in Years / Months / Days. Bill/patient 'age' stays ONE text (e.g. "2 Years 3 Months"), so old records and old screens still work. */
-const APP_VER='v3bc';
+const APP_VER='v3bd';
 function ageJoin(y,m,d){const u=(v,w)=>{v=String(v==null?'':v).trim();if(v===''||!(num(v)>0))return'';return v+' '+w+(num(v)===1?'':'s')};return [u(y,'Year'),u(m,'Month'),u(d,'Day')].filter(Boolean).join(' ')}
 function ageParts(a){a=String(a==null?'':a).trim();if(!a)return{y:'',m:'',d:'',ok:true};if(/^\d+(\.\d+)?$/.test(a))return{y:a,m:'',d:'',ok:true};
  const g=re=>{const x=a.match(re);return x?x[1]:''};const y=g(/(\d+(?:\.\d+)?)\s*(?:y|yr|yrs|year|years)(?![a-z])/i),m=g(/(\d+)\s*(?:m|mo|mon|mons|month|months)(?![a-z])/i),d=g(/(\d+)\s*(?:d|day|days)(?![a-z])/i);return{y,m,d,ok:!!(y||m||d)}}
@@ -389,7 +389,7 @@ function renderLogin(){
  const wait=location.protocol!=='file:'&&!M.lastSync;
  const FEAT=[['🧾','Billing &amp; Due','OPD, Lab, USG, X-Ray, ECG, Echo · advance &amp; due'],['🎟️','OPD Token','Counter + QR online booking, doctor-wise number'],['📅','Advance Booking','30 din aage tak, doctor ka visit day check'],['🚪','Doctor Queue','Agla bulao, andar bhejo, nahi aaya'],['🔊','Voice Call','Token number Bangla / Hindi / English me bolta hai'],['🧪','Lab Reports','140+ test, auto unit &amp; range, high/low flag'],['🩻','USG / X-Ray / Echo','37+ ready format, male/female auto text'],['✍️','Bada Edit','Full A4 editor, Word open / upload'],['📄','Form F (PCPNDT)','Pregnant USG ke liye form ready'],['🖨️','Pad / Plain Print','Header-footer ya pad par, auto page split'],['💬','WhatsApp','Bill &amp; report ek click me'],['👥','Staff Login','Reception, lab, doctor · alag PIN &amp; rights'],['🤝','Commission','Doctor &amp; agent commission, CSV'],['📊','Daily Reports','Collection, due, doctor-wise hisab'],['☁️','Cloud Sync','Computer + mobile, offline bhi chale'],['🗣️','Help 3 bhasha','Bangla, Hindi, English']];
  const fl=a=>a.map(f=>`<li><span class="i">${f[0]}</span><div><b>${f[1]}</b><small>${f[2]}</small></div></li>`).join('');
- $('app').innerHTML=`<div class="login"><div class="lwrap"><div class="lpan"><h2>${esc(BRAND.full)}</h2><div class="sub">Clinic Management Software · সব কাজ এক জায়গায়</div><ul class="feat">${fl(FEAT.slice(0,10))}</ul></div><div class="box"><div class="lg">${logoHTML()}</div><h1>${esc(BRAND.full)}</h1><p>Chanchal, Malda · Clinic Management</p>
+ $('app').innerHTML=`<div class="login"><div class="lwrap"><div class="lpan"><h2>${esc(BRAND.full)}</h2><div class="sub">Clinic Management Software · সব কাজ এক জায়গায়</div><ul class="feat">${fl(FEAT.slice(0,8))}</ul></div><div class="lmid"><div class="box"><div class="lg">${logoHTML()}</div><h1>${esc(BRAND.full)}</h1><p>Chanchal, Malda · Clinic Management</p>
  <label class="f">User<select id="lu">${us.map(u=>`<option value="${u.id}">${esc(u.name)} (${ROLEN[rl(u)]})</option>`).join('')}</select></label>
  <label class="f" style="margin-top:10px">PIN<input id="lp" type="password" inputmode="numeric" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()"></label>
  <div class="err" id="le"></div><div class="muted" id="lwait" style="text-align:center;margin-bottom:8px">${wait?'Loading latest users from the server… please wait':''}</div><button class="btn g" id="lbtn" style="width:100%" onclick="doLogin()" ${wait?'disabled':''}>Sign in</button>
@@ -397,13 +397,14 @@ function renderLogin(){
  <div class="muted" style="text-align:center;margin-top:14px;font-size:12px">Software by <b style="color:#155a9c">UltraAccounting</b></div>
  ${idb?'':'<div class="err">Browser storage is blocked. Open this file in a normal (not private) window, otherwise data will be lost on closing.</div>'}
  </div>
- <div class="lpan"><div class="uacard"><div class="muted" style="font-size:12px">Software designed &amp; developed by</div><div class="ua">UltraAccounting</div>
+ <div class="uacard"><div class="muted" style="font-size:12px">Software designed &amp; developed by</div><div class="ua">UltraAccounting</div>
  <div style="font-size:13px;margin-top:6px">Clinic, hospital, medical shop, petrol pump, dukaan ya office — aapke kaam ke hisab se software banate hain.</div>
  <div style="font-size:13px;margin-top:6px">আপনার ক্লিনিক, দোকান, পেট্রোল পাম্প বা অফিসের জন্য সফটওয়্যার।</div>
  <ul style="margin:10px 0 0;padding-left:18px;font-size:13px;line-height:1.6"><li style="all:revert">Computer + mobile, offline bhi chalta hai</li><li style="all:revert">Setup, training &amp; support</li><li style="all:revert">Malda, West Bengal</li></ul>
  <a class="ph" href="tel:${HELP_PHONE}">📞 Call / WhatsApp: ${HELP_PHONE}</a>
  <div style="text-align:center;margin-top:8px;font-size:12.5px"><a href="https://ultraaccounting-software.onrender.com" target="_blank" rel="noopener">ultraaccounting-software.onrender.com</a></div>
- <div class="uasig">UltraAccounting</div><div class="muted" style="font-size:11.5px">SK Nuruddin · Software Developer</div></div><ul class="feat" style="margin-top:12px">${fl(FEAT.slice(10))}</ul></div>
+ <div class="uasig">UltraAccounting</div><div class="muted" style="font-size:11.5px">SK Nuruddin · Software Developer</div></div></div>
+ <div class="lpan"><h2>Aur bhi features</h2><div class="sub">Reception se doctor tak · ek software</div><ul class="feat">${fl(FEAT.slice(8))}</ul></div>
  </div></div>`;
  setTimeout(()=>{const e=$('lp');if(e)e.focus()},50);
  if(wait)setTimeout(()=>{if(M.lastSync||ME)return;const lb=$('lbtn'),lw=$('lwait');if(lb&&lw&&!$('ckin')){M.loginFallback=true;lb.disabled=false;lw.textContent='Server is slow. You can sign in with the users saved on this computer; data will sync when the server answers.'}},20000);
