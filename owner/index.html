@@ -1,0 +1,57 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>UltraAccounting — Owner Panel</title>
+<style>
+body{margin:0;font-family:system-ui,Segoe UI,Arial,sans-serif;background:#eef4f1;color:#14302a}
+header{background:#0f5132;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+header h1{font-size:18px;margin:0}main{max-width:1100px;margin:0 auto;padding:14px}
+.card{background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.07);padding:14px;margin-bottom:14px}
+input,textarea,select{font:inherit;padding:8px;border:1px solid #c7d6cf;border-radius:8px;width:100%;box-sizing:border-box}
+textarea{min-height:60px}button{font:inherit;padding:8px 14px;border:0;border-radius:8px;background:#0f7a4a;color:#fff;cursor:pointer}
+button.o{background:#fff;color:#0f5132;border:1px solid #0f7a4a}button.r{background:#c0392b}button.s{padding:5px 10px;font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px;border-bottom:1px solid #e3ece8;text-align:left;vertical-align:top}
+th{background:#f1f7f4}.on{color:#0f7a4a;font-weight:600}.off{color:#999}.muted{color:#6b7f78;font-size:13px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:700px){.g2{grid-template-columns:1fr}table{font-size:13px}}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:12px;background:#eef}.seen{background:#e3f6ea;color:#0f7a4a}.unseen{background:#fff3cd;color:#8a6100}
+#msg{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#14302a;color:#fff;padding:10px 16px;border-radius:8px;display:none}
+</style></head><body>
+<header><h1>UltraAccounting · Owner Panel</h1><div id="who"></div></header><main id="app"><div class="card">Loading…</div></main><div id="msg"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB=supabase.createClient('https://ochdzpcxrhlzloxbnzua.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaGR6cGN4cmhsemxveGJuenVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0ODMyNDgsImV4cCI6MjEwOTA1OTI0OH0.ydBBoTuNF1qsQMYN0LMS4GZbie98iZ60Bj0et0-jWcw');
+const $=id=>document.getElementById(id);const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(t){const m=$('msg');m.textContent=t;m.style.display='block';clearTimeout(m._t);m._t=setTimeout(()=>m.style.display='none',3000)}
+const M3=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fd(d){if(!d)return '—';const a=new Date(d.length<=10?d+'T00:00:00':d);return String(a.getDate()).padStart(2,'0')+'-'+M3[a.getMonth()]+'-'+a.getFullYear()}
+function ft(d){if(!d)return '—';const a=new Date(d);return fd(d)+' '+a.toTimeString().slice(0,5)}
+function days(d){if(!d)return '—';const n=Math.floor((new Date().setHours(0,0,0,0)-new Date(d+'T00:00:00'))/864e5)+1;return n>0?n+(n>1?' days':' day'):'—'}
+function online(t){if(!t)return '<span class="off">never</span>';const m=(Date.now()-new Date(t))/6e4;return m<60?'<span class="on">● online ('+Math.round(m)+' min ago)</span>':'<span class="off">last seen '+ft(t)+'</span>'}
+let C=[],N=[];
+async function init(){const {data:{session}}=await SB.auth.getSession();if(!session)return loginView();$('who').innerHTML=esc(session.user.email)+' <button class="o s" onclick="SB.auth.signOut().then(()=>location.reload())">Logout</button>';load()}
+function loginView(){$('app').innerHTML=`<div class="card" style="max-width:420px;margin:40px auto"><h2 style="margin-top:0">Owner login</h2><p class="muted">Enter your UltraAccounting Gmail. A login link will come to that Gmail. Open it on this same device.</p><input id="em" type="email" placeholder="you@gmail.com"><div style="margin-top:10px"><button onclick="sendLink()">Send login link</button></div></div>`}
+async function sendLink(){const e=$('em').value.trim().toLowerCase();if(!e)return;const {error}=await SB.auth.signInWithOtp({email:e,options:{shouldCreateUser:false,emailRedirectTo:location.origin+location.pathname}});if(error)toast('Error: '+error.message);else toast('Link sent. Check your Gmail (also Spam).')}
+async function load(){const a=await SB.from('ua_clients').select('*').order('given_date',{ascending:true});const b=await SB.from('ua_notices').select('*').order('created_at',{ascending:false}).limit(200);
+ if(a.error){$('app').innerHTML='<div class="card">Not allowed: '+esc(a.error.message)+'</div>';return}C=a.data;N=b.data||[];draw()}
+function draw(){
+ let h=`<div class="card"><h2 style="margin-top:0">Clients (${C.length})</h2><table><tr><th>Client</th><th>Software</th><th>Given on</th><th>Running</th><th>Status</th><th></th></tr>`;
+ for(const c of C){const un=N.filter(n=>n.client_id===c.id&&n.active&&!n.seen_at).length;
+  h+=`<tr><td><b>${esc(c.name)}</b><br>${c.url?`<a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.url.replace('https://',''))}</a>`:''}</td><td>${esc(c.software)}${c.app_ver?'<br><span class="muted">'+esc(c.app_ver)+'</span>':''}</td><td>${fd(c.given_date)}</td><td>${days(c.given_date)}</td><td>${online(c.last_seen)}${un?'<br><span class="pill unseen">'+un+' msg not seen</span>':''}</td><td><button class="s" onclick="openC('${c.id}')">Open</button></td></tr>`}
+ h+=`</table></div><div class="card"><h3 style="margin-top:0">+ Add new client</h3><div class="g2"><input id="n_id" placeholder="Short code (e.g. citylab)"><input id="n_name" placeholder="Client name"><input id="n_sw" placeholder="Software"><input id="n_url" placeholder="Link (https://…)"><input id="n_date" type="date"></div><div style="margin-top:8px"><button onclick="addC()">Add client</button></div></div><div id="det"></div>`;
+ $('app').innerHTML=h}
+async function addC(){const id=$('n_id').value.trim().toLowerCase().replace(/[^a-z0-9-]/g,'');if(!id||!$('n_name').value.trim())return toast('Code and name needed');
+ const {error}=await SB.from('ua_clients').insert({id,name:$('n_name').value.trim(),software:$('n_sw').value.trim(),url:$('n_url').value.trim(),given_date:$('n_date').value||null});if(error)return toast(error.message);toast('Client added');load()}
+function openC(id){const c=C.find(x=>x.id===id);const ns=N.filter(n=>n.client_id===id);const acc=(c.accounts||[]);
+ let h=`<div class="card"><div class="row" style="justify-content:space-between"><h2 style="margin:0">${esc(c.name)}</h2><button class="o s" onclick="$('det').innerHTML=''">Close</button></div>
+ <h3>Send message to client screen</h3><textarea id="m_txt" placeholder="e.g. Is mahine ka maintenance ₹500 baki hai. Kripya jama karein."></textarea><div class="row" style="margin-top:8px"><select id="m_kind" style="width:auto"><option value="info">Info (blue)</option><option value="due">Payment due (orange)</option><option value="urgent">Urgent (red)</option></select><button onclick="sendN('${id}')">Send</button></div>
+ <h3>Messages</h3><table><tr><th>Date</th><th>Message</th><th>Seen</th><th></th></tr>${ns.map(n=>`<tr><td>${ft(n.created_at)}</td><td>${esc(n.msg)}</td><td>${n.seen_at?'<span class="pill seen">seen '+ft(n.seen_at)+'</span>':'<span class="pill unseen">not seen</span>'}</td><td>${n.active?`<button class="o s" onclick="offN('${n.id}','${id}')">Remove</button>`:'<span class="muted">removed</span>'}</td></tr>`).join('')||'<tr><td colspan=4 class="muted">No messages yet</td></tr>'}</table>
+ <h3>Details</h3><div class="g2"><label>Software<input id="e_sw" value="${esc(c.software)}"></label><label>Link<input id="e_url" value="${esc(c.url)}"></label><label>Given on<input id="e_date" type="date" value="${esc(c.given_date||'')}"></label><label>Name<input id="e_name" value="${esc(c.name)}"></label></div>
+ <label>Notes (price, maintenance, baki…)<textarea id="e_notes">${esc(c.notes)}</textarea></label>
+ <h3>Accounts used (emails only — never passwords)</h3><textarea id="e_acc" style="min-height:110px">${esc(acc.map(a=>a.site+': '+a.email).join('\n'))}</textarea><div class="muted">One per line, like: GitHub: name@gmail.com</div>
+ <div class="row" style="margin-top:10px"><button onclick="saveC('${id}')">Save</button><button class="o s" onclick="this.nextElementSibling.style.display='inline';this.style.display='none'">Show client key</button><code style="display:none">${esc(c.ckey)}</code></div></div>`;
+ $('det').innerHTML=h;$('det').scrollIntoView({behavior:'smooth'})}
+async function saveC(id){const acc=$('e_acc').value.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const i=l.indexOf(':');return i>0?{site:l.slice(0,i).trim(),email:l.slice(i+1).trim()}:{site:l,email:''}});
+ const {error}=await SB.from('ua_clients').update({software:$('e_sw').value.trim(),url:$('e_url').value.trim(),given_date:$('e_date').value||null,name:$('e_name').value.trim(),notes:$('e_notes').value,accounts:acc}).eq('id',id);if(error)return toast(error.message);toast('Saved');await load();openC(id)}
+async function sendN(id){const t=$('m_txt').value.trim();if(!t)return;const {error}=await SB.from('ua_notices').insert({client_id:id,msg:t,kind:$('m_kind').value});if(error)return toast(error.message);toast('Sent. It shows on the client screen within 30 min or on next open.');await load();openC(id)}
+async function offN(nid,id){if(!confirm('Remove this message from client screen?'))return;const {error}=await SB.from('ua_notices').update({active:false}).eq('id',nid);if(error)return toast(error.message);await load();openC(id)}
+SB.auth.onAuthStateChange((ev)=>{if(ev==='SIGNED_IN'&&!C.length)init()});init();
+</script></body></html>
