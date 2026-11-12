@@ -1,5 +1,12 @@
 (function(){
 var BN={
+"Website making for shops, clinics & businesses":"দোকান, ক্লিনিক ও ব্যবসার জন্য ওয়েবসাইট তৈরি",
+"Computer & laptop repair in Chanchal.":"চাঁচলে কম্পিউটার ও ল্যাপটপ রিপেয়ার।",
+"PC and laptop repair":"পিসি ও ল্যাপটপ রিপেয়ার",
+"Broken laptop or PC fixed":"ভাঙা ল্যাপটপ বা পিসি ঠিক করা হয়",
+"Software install and setup":"সফটওয়্যার ইনস্টল ও সেটআপ",
+"Call / WhatsApp 7602292599.":"কল / WhatsApp করুন 7602292599।",
+"Repair":"রিপেয়ার",
 "Software for your business — built in Chanchal, Malda":"আপনার ব্যবসার জন্য সফটওয়্যার — তৈরি চাঁচল, মালদায়",
 "Billing, stock, accounts, staff and reports. Works on phone and computer, online and offline, in English, বাংলা and हिंदी.":"বিলিং, স্টক, হিসাব, স্টাফ আর রিপোর্ট — সব এক জায়গায়। মোবাইল আর কম্পিউটারে চলে, ইন্টারনেট থাকুক বা না থাকুক। ইংরেজি, বাংলা আর হিন্দিতে।",
 "Next step":"পরের ধাপ",
