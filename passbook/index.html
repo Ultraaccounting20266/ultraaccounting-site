@@ -23,6 +23,13 @@ tr.c:hover{background:#faf8ff;cursor:pointer}.muted{color:var(--m);font-size:13p
 .sheet{font-family:var(--ff);font-size:var(--fs);font-weight:var(--fw);line-height:1.25;white-space:pre;color:#000;padding:var(--top) 0 0 var(--left)}
 .code{font-family:Consolas,monospace;font-size:20px;letter-spacing:2px;background:#f6f3fd;padding:10px;border-radius:8px;text-align:center}
 #printArea{display:none}
+main{max-width:1400px}.dash{padding:10px}.dg{display:grid;grid-template-columns:1fr 1fr 1fr 150px;gap:10px}.col{display:flex;flex-direction:column;gap:4px}
+.f label{font-size:12px;color:#333;margin-bottom:1px}.f i{color:#d00;font-style:normal}.f input,.f select{padding:7px 9px;border:1px solid #bbb;border-radius:4px;text-transform:uppercase}.f input::placeholder{text-transform:none}
+.pair{display:grid;grid-template-columns:100px 1fr;gap:4px}.ck{gap:14px;margin:6px 0}.ck label{color:#222;font-size:14px;display:flex;gap:4px;align-items:center}.ck input{width:auto}
+.big{font-size:20px;padding:12px;margin-top:auto;background:#6d28d9;border-radius:4px}.side{display:flex;flex-direction:column;gap:8px}
+.side .g{background:#ddd;color:#111;font-weight:700;border-radius:4px;padding:11px}.side .g:disabled{color:#999;cursor:default}.imp{background:#6d28d9;color:#fff!important;font-weight:700;text-align:center;padding:11px;border-radius:4px;cursor:pointer;font-size:15px}
+.tw{overflow:auto;max-height:420px;border-top:2px solid #6d28d9;margin-top:6px}.tw table{font-size:14px;white-space:nowrap}.tw th{position:sticky;top:0;font-weight:500}tr.sel{background:#ede5ff}
+@media(max-width:1000px){.dg{grid-template-columns:1fr 1fr}.side{flex-direction:row;flex-wrap:wrap;grid-column:1/-1}.side>*{flex:1}}@media(max-width:640px){.dg{grid-template-columns:1fr}}
 @media print{@page{size:var(--pw) var(--ph);margin:0}body{background:#fff}header,main,#msg{display:none!important}#printArea{display:block}}
 </style><style id="pageCss"></style></head><body>
 <header><h1 id="ttl">UltraAccounting · Passbook</h1><span id="days"></span><span id="hb"></span></header>
@@ -97,53 +104,59 @@ async function payView(kind){hdr();let st=null;try{const r=await SB.rpc('pb_stat
 async function recheck(){try{const r=await SB.rpc('pb_status',{p_token:S.token});if(r.error)throw r.error;const st=r.data;S.valid_until=st.valid_until;saveSess();
  const ok=st.active&&(!st.valid_until||st.valid_until>=new Date(Date.now()+19800000).toISOString().slice(0,10));if(ok){toast('Activated');start()}else toast('Not confirmed yet')}catch(e){logout(true)}}
 // ---------- customers ----------
-const F=[['cust_id','Customer ID'],['name','Acc. holder'],['acc_no','Account no.'],['joint','Joint holder'],['co','Address 1 (C/O)'],['addr2','Address 2'],['addr3','Address 3'],['addr4','State / PIN'],['opened','Opened on (DD-MM-YYYY)'],['operated','Operated by'],['nominee','Nominee']];
-const FE=[['uid','UID / Aadhaar no.'],['pan','PAN number'],['mobile','Mobile no.']];
+const OPT={title:['MR','MRS','MS','KUMARI','MASTER','SMT'],gprefix:['S/O','D/O','W/O','C/O'],acctype:['SAVINGS ACCOUNT','BSBD ACCOUNT','CURRENT ACCOUNT','RD ACCOUNT','FD ACCOUNT','JOINT ACCOUNT'],nomination:['REGISTERED','NOT REGISTERED'],occupation:['','STUDENT','HOUSEWIFE','FARMER','LABOUR','BUSINESS','SERVICE','SELF EMPLOYED','RETIRED','OTHERS']};
+const F=[['title','Title'],['name','Customer Name'],['dob','DOB'],['gprefix','Guardian prefix'],['gname','Guardian Name'],['vill','Address1 (Village)'],['post','Address2 (Post)'],['dist','District / City'],['pin','Pincode'],['state','State'],['email','Email'],['acc_no','A/c No.'],['cust_id','CIF / Customer ID'],['ckyc','CKYC No.'],['acctype','Account Type'],['nomination','Nomination'],['nominee','Nominee Name'],['opened','Opening Date'],['issue','Issue Date'],['occupation','Occupation'],['deposit','Initial Deposit'],['delivery','Passbook Delivery Date'],['apy','APY'],['pmsby','PMSBY'],['pmjjy','PMJJY'],['remarks','Remarks'],['operated','Operated by'],['joint','Joint holder']];
+const FE=[['uid','Aadhaar No'],['pan','PAN No'],['mobile','Mobile No']];
+const BLANK=()=>({title:'MR',gprefix:'S/O',dist:'MALDA',state:'WEST BENGAL',acctype:'SAVINGS ACCOUNT',nomination:'REGISTERED',operated:'SELF',issue:today()});
 async function start(){hdr();await loadC();listView()}
 async function loadC(){try{const rows=await rpc('pb_list',{p_token:S.token});CUST=await Promise.all(rows.map(async r=>{let e={};if(r.enc){try{e=JSON.parse(td.decode(await dec(DK,r.enc)))}catch(x){e={_locked:1}}}return {id:r.id,...r.data,...e,updated_at:r.updated_at}}))}catch(e){if(e.message!=='stop')toast(e.message);throw e}}
-function listView(q){hdr();q=q||'';const ql=q.toLowerCase();const L=CUST.filter(c=>!ql||[c.name,c.acc_no,c.cust_id,c.mobile,c.co].join(' ').toLowerCase().includes(ql));
- $('app').innerHTML=`<div class="card"><div class="row"><input id="q" placeholder="Search by name, account no., customer ID" style="flex:1;min-width:220px" value="${esc(q)}"><button onclick="edit()">+ New customer</button></div>
- <p class="muted">${CUST.length} customers saved</p><table><tr><th>Customer ID</th><th>Name</th><th>Account no.</th><th>Opened</th><th></th></tr>
- ${L.slice(0,300).map(c=>`<tr class="c" onclick="edit('${c.id}')"><td>${esc(c.cust_id)}</td><td><b>${esc(c.name)}</b></td><td>${esc(c.acc_no)}</td><td>${esc(c.opened)}</td><td><button class="s" onclick="event.stopPropagation();edit('${c.id}',1)">Print</button></td></tr>`).join('')||'<tr><td colspan=5 class="muted">No customers yet. Click "+ New customer" or import from Excel.</td></tr>'}</table></div>`;
- const qi=$('q');qi.oninput=()=>{const v=qi.value;clearTimeout(qi._t);qi._t=setTimeout(()=>{listView(v);const n=$('q');n.focus();n.setSelectionRange(v.length,v.length)},250)}}
-function today(){const d=new Date();return String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+d.getFullYear()}
-function edit(id,prt){CUR=id?{...CUST.find(c=>c.id===id)}:{operated:'SELF'};CUR.issue=today();hdr();
- $('app').innerHTML=`<div class="split"><div class="card"><h3 style="margin-top:0">${id?'Customer':'New customer'}</h3>
-<div class="muted">Bank account opening PDF → fills the form.</div>
- ${F.map(([k,l])=>`<label style="margin-top:6px">${l}<input data-k="${k}" value="${esc(CUR[k])}"></label>`).join('')}
- ${FE.map(([k,l])=>`<label style="margin-top:6px">${l} 🔒<input data-k="${k}" value="${esc(CUR[k])}"></label>`).join('')}
- <label style="margin-top:6px">Issue date<input data-k="issue" value="${esc(CUR.issue)}"></label>
- <label class="o" style="display:inline-block;margin:4px 0 8px;padding:8px 12px;border:1px solid #6a1b9a;border-radius:6px;color:#6a1b9a;cursor:pointer;font-weight:600">📄 Import PDF<input type="file" accept="application/pdf,.pdf" onchange="impPdf(event)" style="display:none"></label>
- <div class="row" style="margin-top:10px"><button onclick="saveCur()">Save</button><button onclick="saveCur(1)">Save + Print</button><button class="o" onclick="listView()">Back</button>${id?`<button class="r s" onclick="delCur()">Delete</button>`:''}</div>
- <p class="muted">🔒 fields are locked with your password before saving to the cloud.</p></div>
- <div class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">Print preview</h3><button onclick="doPrint()">🖨 Print</button></div><p class="muted">Preview is at passbook page size. To shift the position, use Settings.</p><div id="pv"></div></div></div>`;
- document.querySelectorAll('[data-k]').forEach(i=>i.oninput=()=>{CUR[i.dataset.k]=i.value;prev()});prev();if(prt)setTimeout(doPrint,300)}
-function grab(){document.querySelectorAll('[data-k]').forEach(i=>CUR[i.dataset.k]=i.value.trim())}
-async function saveCur(prt){grab();if(!CUR.name&&!CUR.acc_no)return toast('Enter name or account no.');
+function fi(k,l,req,ph,o){o=o||{};const v=esc(CUR[k]);return `<div class="f"><label>${l}${req?' <i>*</i>':''}</label>${o.sel?`<div class="pair"><select data-k="${o.sel}">${OPT[o.sel].map(x=>`<option${x===CUR[o.sel]?' selected':''}>${x}</option>`).join('')}</select><input data-k="${k}" value="${v}" placeholder="${ph||''}"></div>`:OPT[k]?`<select data-k="${k}">${OPT[k].map(x=>`<option value="${x}"${x===(CUR[k]||'')?' selected':''}>${x||'Select '+l}</option>`).join('')}</select>`:`<input data-k="${k}" value="${v}" placeholder="${ph||''}"${o.dt?' inputmode="numeric" maxlength="10"':''}>`}</div>`}
+function listView(q,keep){hdr();if(!keep)CUR=BLANK();q=q||'';
+ $('app').innerHTML=`<div class="card dash"><div class="dg">
+ <div class="col">${fi('name','Customer Name',1,'Enter Customer Name',{sel:'title'})}${fi('dob','Dob',0,'DD-MM-YYYY',{dt:1})}${fi('gname','Guardian Name',1,'Enter Guardian Name',{sel:'gprefix'})}${fi('vill','Address1',1,'Enter Village')}${fi('post','Address2',1,'Enter Post')}${fi('dist','District / City',1,'Enter District')}${fi('pin','Pincode',1,'Enter Pincode')}${fi('state','State',1,'Enter State')}${fi('mobile','Mobile No 🔒',0,'Enter Mobile')}${fi('email','Customer Email Id',0,'Enter Customer Email Id')}</div>
+ <div class="col">${fi('acc_no','A/c No.',1,'Enter Account Number')}<div class="f"><label>Confirm A/c No. <i>*</i></label><input id="acc2" value="${esc(CUR.acc_no)}" placeholder="Confirm Account Number"></div>${fi('cust_id','Cif/Customer ID',0,'Enter Cif/Customer ID')}${fi('ckyc','Ckyc No.',0,'Enter Ckyc Number')}${fi('acctype','Account Type',1)}${fi('nomination','Nomination',1)}${fi('nominee','Nominee Name',0,'Enter Nominee Name')}${fi('pan','Pan No 🔒',0,'__________')}${fi('uid','Aadhaar No 🔒',0,'Enter Aadhaar No')}${fi('remarks','Remarks',0,'Enter Remarks')}</div>
+ <div class="col">${fi('opened','Opening Date',1,'DD-MM-YYYY',{dt:1})}${fi('issue','Issue Date',1,'DD-MM-YYYY',{dt:1})}${fi('occupation','Occupation')}${fi('deposit','Initial Deposit',0,'Enter Initial Deposit')}${fi('delivery','Passbook Delivery Date',0,'DD-MM-YYYY',{dt:1})}
+  <div class="row ck">${['apy','pmsby','pmjjy'].map(k=>`<label><input type="checkbox" data-c="${k}"${CUR[k]?' checked':''}> ${k.toUpperCase()}</label>`).join('')}</div>
+  <button class="big" onclick="saveCur()">Save Customer</button></div>
+ <div class="side"><button class="g" onclick="listView()">Clear</button><button class="g" onclick="doPrint()" ${CUR.id?'':'disabled'}>Print</button><button class="g" onclick="delCur()" ${CUR.id?'':'disabled'}>Delete</button><button class="g" onclick="setView()">Settings</button>
+  <label class="imp">Import PDF<input type="file" accept="application/pdf,.pdf" onchange="impPdf(event)" style="display:none"></label><button class="g" onclick="saveCur(1)">Save + Print</button></div></div>
+ <div class="row" style="justify-content:space-between;margin-top:8px"><span class="muted">${CUST.length} customers · 🔒 = locked with your password</span><div class="f" style="min-width:260px"><label>Search</label><input id="q" placeholder="Search Customer" value="${esc(q)}"></div></div>
+ <div class="tw"><table><tr><th>Id</th><th>CustomerName</th><th>AccountNo</th><th>CifNo</th><th>MobileNo</th><th>CareofPrefix</th><th>CareOfName</th><th>Address1</th><th>Address2</th><th>District</th><th>State</th><th>Aadhaar</th></tr><tbody id="tb"></tbody></table></div></div>`;
+ document.querySelectorAll('[data-k]').forEach(i=>i.oninput=()=>{CUR[i.dataset.k]=i.value});
+ const qi=$('q');qi.oninput=()=>{clearTimeout(qi._t);qi._t=setTimeout(()=>rows(qi.value),200)};rows(q)}
+function rows(q){const ql=(q||'').toLowerCase();const L=CUST.filter(c=>!ql||[c.name,c.acc_no,c.cust_id,c.mobile,c.gname,c.vill].join(' ').toLowerCase().includes(ql));const n=CUST.length;
+ $('tb').innerHTML=L.slice(0,300).map(c=>`<tr class="c${CUR.id===c.id?' sel':''}" onclick="pick('${c.id}')"><td>${n-CUST.indexOf(c)}</td><td>${esc(c.name)}</td><td>${esc(c.acc_no)}</td><td>${esc(c.cust_id)}</td><td>${esc(c.mobile)}</td><td>${esc(c.gprefix)}</td><td>${esc(c.gname)}</td><td>${esc(c.vill)}</td><td>${esc(c.post)}</td><td>${esc(c.dist)}</td><td>${esc(c.state)}</td><td>${esc(fmtUid(c.uid))}</td></tr>`).join('')||'<tr><td colspan=12 class="muted">No customers yet. Fill the form or use Import PDF.</td></tr>'}
+function pick(id){CUR={...CUST.find(c=>c.id===id)};const q=$('q').value;listView(q,1);window.scrollTo(0,0)}
+function edit(id,prt){if(id)pick(id);else listView();if(prt)setTimeout(doPrint,200)}
+function grab(){document.querySelectorAll('[data-k]').forEach(i=>CUR[i.dataset.k]=i.value.trim().toUpperCase());document.querySelectorAll('[data-c]').forEach(i=>CUR[i.dataset.c]=i.checked?'1':'')}
+async function saveCur(prt){grab();if(!CUR.name)return toast('Enter customer name');if(!CUR.acc_no)return toast('Enter account no.');
+ const a2=$('acc2');if(a2&&a2.value.trim()!==CUR.acc_no)return toast('Account no. and Confirm A/c No. do not match');
+ const dup=CUST.find(c=>c.acc_no===CUR.acc_no&&c.id!==CUR.id);if(dup)return toast('This account no. is already saved: '+dup.name);
  const data={};F.forEach(([k])=>data[k]=CUR[k]||'');const e={};FE.forEach(([k])=>e[k]=CUR[k]||'');
  const id=CUR.id||crypto.randomUUID();
  try{await rpc('pb_save',{p_token:S.token,p_rows:[{id,data,enc:await enc(DK,te.encode(JSON.stringify(e)))}]})}catch(x){if(x.message!=='stop')toast(x.message);return}
- CUR.id=id;const i=CUST.findIndex(c=>c.id===id);const rec={id,...data,...e};if(i>=0)CUST[i]=rec;else CUST.unshift(rec);toast('Saved');if(prt)doPrint()}
-async function delCur(){if(!confirm('Delete this customer?'))return;try{await rpc('pb_delete',{p_token:S.token,p_id:CUR.id})}catch(x){if(x.message!=='stop')toast(x.message);return}CUST=CUST.filter(c=>c.id!==CUR.id);toast('Deleted');listView()}
+ CUR.id=id;const i=CUST.findIndex(c=>c.id===id);const rec={id,...data,...e};if(i>=0)CUST[i]=rec;else CUST.unshift(rec);toast('Customer saved');listView($('q')&&$('q').value,1);if(prt)setTimeout(doPrint,200)}
+async function delCur(){if(!CUR.id||!confirm('Delete '+(CUR.name||'this customer')+'?'))return;try{await rpc('pb_delete',{p_token:S.token,p_id:CUR.id})}catch(x){if(x.message!=='stop')toast(x.message);return}CUST=CUST.filter(c=>c.id!==CUR.id);toast('Deleted');listView()}
+function addrLines(c){const co=c.gname?((c.gprefix||'C/O')+' '+c.gname):'';const last=[c.dist&&('DIST '+c.dist),[c.state,c.pin].filter(Boolean).join(' - ')].filter(Boolean).join(', ');return [co,c.vill,c.post,last].filter(Boolean)}
+function today(){const d=new Date();return String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+d.getFullYear()}
 function pdfParse(T){const ls=T.split('\n').map(s=>s.replace(/\s+$/,''));const U=s=>String(s||'').replace(/\s+/g,' ').trim().toUpperCase();
  const val=(re)=>{for(const l of ls){const m=l.match(re);if(m)return m[1].trim()}return ''};
  const o={};o.name=U(val(/^\s*Customer Name\s{2,}(.+)/i));o.acc_no=val(/^\s*Account No\s{2,}(\d{6,})/i);o.cust_id=U(val(/^\s*Customer ID\s{2,}(\S+)/i));
  o.uid=U(val(/^\s*Aadhaar No\s{2,}([X\d ]{8,})/i)).replace(/\s/g,'');o.mobile=val(/^\s*Mobile No\s{2,}(\d{10})/i)||val(/^\s*Tel\.No.*?\s{2,}(\d{10})/i);
  const sex=U(val(/^\s*Sex\s{2,}(\S+)/i));const gu=U(val(/Name of Father \/ Guardian\s{2,}(.+)/i));const sp=U(val(/Name of Spouse.*?\)\s{2,}(.+)/i));const ms=U(val(/Marital Status\s{2,}(\S+)/i));
- if(sex==='FEMALE'&&ms==='MARRIED'&&sp)o.co='W/O '+sp;else if(gu)o.co=(sex==='FEMALE'?'D/O ':'S/O ')+gu;
+ o.title=sex==='FEMALE'?(ms==='MARRIED'?'MRS':'MS'):'MR';if(sex==='FEMALE'&&ms==='MARRIED'&&sp){o.gprefix='W/O';o.gname=sp}else if(gu){o.gprefix=sex==='FEMALE'?'D/O':'S/O';o.gname=gu}o.dob=val(/^\s*Date of Birth\s{2,}(\d{2}-\d{2}-\d{4})/i);o.occupation=U(val(/^\s*Occupation Type\s{2,}(\S+)/i));if(!OPT.occupation.includes(o.occupation))o.occupation='OTHERS';
  const pan=U(val(/PAN \/ GIR no.*?\s{2,}([A-Z]{5}\d{4}[A-Z])/i));if(pan)o.pan=pan;
  const a0=ls.findIndex(l=>/ADDRESS\s*:/i.test(l));let ad='';if(a0>=0){const blk=[];for(let j=a0;j<ls.length&&j<a0+10;j++){if(j>a0&&/Tel\.No|^\s*Email|CUSTOMER PROFILE/i.test(ls[j]))break;blk.push(ls[j])}
   ad=blk.join(' ').replace(/.*ADDRESS\s*:/i,'').replace(/Flat No\.\/Bldg\. Name|Street \/ Road \/ Locality|City \/ District \/ State with pincode/gi,' ')}
  ad=ad.replace(/C\/O\s*:?[^,]*,?/i,'');const pin=(ad.match(/\b(\d{6})\b/)||[])[1]||'';ad=ad.replace(/\b\d{6}\b/,'');
  const parts=ad.split(',').map(s=>s.replace(/\s*-\s*/g,' ').replace(/\s+/g,' ').trim()).filter(Boolean);let vill='',po='',dist='',st='',rest=[];
  parts.forEach(p=>{let m;if(m=p.match(/^(?:Village|Vill\.?)\s+(.+)/i))vill=m[1];else if(m=p.match(/^(?:Post|PO|P\.O\.?)\s+(.+)/i))po=m[1];else if(m=p.match(/^(?:Dist|District)\.?\s+(.+)/i))dist=m[1];else if(/bengal|bihar|jharkhand|assam|odisha|pradesh/i.test(p))st=p;else rest.push(p)});
- o.addr2=U([vill&&'VILL '+vill,po&&'PO '+po].filter(Boolean).join(', '));o.addr3=U([rest.join(', '),dist&&'DIST '+dist].filter(Boolean).join(', '));o.addr4=U([st,pin].filter(Boolean).join(' - '));
- if(!o.addr2){o.addr2=o.addr3;o.addr3=''}
+ o.vill=U(vill?'VILL '+vill:rest.shift()||'');o.post=U([po&&'PO '+po,...rest].filter(Boolean).join(', '));o.dist=U(dist);o.state=U(st);o.pin=pin;
  const ft=T.match(/\d+ of \d+\s+(\d{2}-\d{2}-\d{4})/);if(ft)o.opened=ft[1];
  const i=ls.findIndex(l=>/minority of nominee/i.test(l));if(i>=0){const R=/^(FATHER|MOTHER|HUSBAND|WIFE|SON|DAUGHTER|BROTHER|SISTER|GRANDFATHER|GRANDMOTHER|UNCLE|AUNT|OTHERS?|GUARDIAN|SPOUSE)$/i;let nm=[],rel='';
   for(let j=i+1;j<ls.length&&j<i+12;j++){const l=ls[j].trim();if(!l)continue;if(/^(Date|Place)\s*:/i.test(l)||/WITNESS/i.test(l))break;l.split(/\s{2,}/).forEach(t=>{if(R.test(t))rel=t;else if(/^[A-Za-z .]+$/.test(t))nm.push(t)})}
-  if(nm.length)o.nominee=U(nm.join(' '))+(rel?' ('+U(rel)+')':'')}
- o.operated=U(val(/Mode of Operation\s*:\s*(\S+)/i))||'SELF';
+  if(nm.length)o.nominee=U(nm.join(' '))}
+ o.nomination=o.nominee?'REGISTERED':'NOT REGISTERED';o.operated=U(val(/Mode of Operation\s*:\s*(\S+)/i))||'SELF';
  Object.keys(o).forEach(k=>{if(!o[k])delete o[k]});return o}
 
 let PJ=null;async function pdfjs(){if(PJ)return PJ;const V='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';await new Promise((ok,no)=>{const s=document.createElement('script');s.src=V+'pdf.min.js';s.onload=ok;s.onerror=no;document.head.appendChild(s)});window.pdfjsLib.GlobalWorkerOptions.workerSrc=V+'pdf.worker.min.js';return PJ=window.pdfjsLib}
@@ -153,8 +166,8 @@ async function pdfText(buf){const P=await pdfjs();const doc=await P.getDocument(
   L.forEach(l=>{l.a.sort((a,b)=>a.x-b.x);let t='',e=null;l.a.forEach(i=>{if(e!==null){const g=i.x-e;t+=g>8?'   ':(g>1||!/\s$/.test(t))&&!/^\s/.test(i.s)?' ':''}t+=i.s;e=i.x+i.w});out.push('          '+t)})}
  return out.join('\n')}
 async function impPdf(ev){const f=ev.target.files[0];ev.target.value='';if(!f)return;try{toast('Reading PDF…');const o=pdfParse(await pdfText(await f.arrayBuffer()));if(!o.name&&!o.acc_no)return toast('Could not read this PDF. Use the bank account opening receipt PDF.');
- grab();if(o.acc_no){const ex=CUST.find(c=>c.acc_no===o.acc_no);if(ex&&ex.id!==CUR.id&&!confirm('This account no. is already saved ('+ex.name+'). Open and update it?'))return;if(ex&&ex.id!==CUR.id)CUR={...ex}}
- Object.assign(CUR,o);CUR.issue=CUR.issue||today();document.querySelectorAll('[data-k]').forEach(i=>i.value=CUR[i.dataset.k]||'');prev();toast('PDF imported. Check the fields, then Save.')}catch(x){toast('PDF error: '+x.message)}}
+ const ex=o.acc_no&&CUST.find(c=>c.acc_no===o.acc_no);if(ex&&!confirm('This account no. is already saved ('+ex.name+'). Update it?'))return;
+ CUR=Object.assign(ex?{...ex}:BLANK(),o);listView($('q')&&$('q').value,1);toast('PDF imported. Check the fields, then Save Customer.')}catch(x){toast('PDF error: '+x.message)}}
 // ---------- layout ----------
 function lines(c,st){const L=[],R=[];const lab=(a,v)=>a+(v||'');
  L.push(lab('BRANCH NAME: ',st.branch));R.push(lab('IFSC CODE: ',st.ifsc));
@@ -162,8 +175,8 @@ function lines(c,st){const L=[],R=[];const lab=(a,v)=>a+(v||'');
  const ba=[st.baddr2,st.baddr3].filter(Boolean);ba.forEach(b=>{L.push('             '+b);R.push('')});
  R[R.length-1]=lab('MICR CODE: ',st.micr);
  L.push(lab('BR. EMAIL  : ',st.bemail));R.push('');
- const ad=[c.co,c.addr2,c.addr3,c.addr4].filter(Boolean);
- const left=[['CUSTOMER ID: ',c.cust_id],['ACCOUNT NO.: ',c.acc_no],['UID NO.    : ',fmtUid(c.uid)],['PAN NUMBER : ',c.pan],['MOBILE NO. : ',c.mobile],['OPENED ON  : ',c.opened],['ISSUE DATE : ',c.issue],['OPERATED BY: ',c.operated],['NOMINEE    : ',c.nominee]];
+ const ad=addrLines(c);
+ const left=[['CUSTOMER ID: ',c.cust_id],['ACCOUNT NO.: ',c.acc_no],['UID NO.    : ',fmtUid(c.uid)],['PAN NUMBER : ',c.pan],['MOBILE NO. : ',c.mobile],['OPENED ON  : ',c.opened],['ISSUE DATE : ',c.issue],['OPERATED BY: ',c.operated||'SELF'],['NOMINEE    : ',c.nominee]];
  const right=[lab('ACC. HOLDER : ',c.name),lab('JOINT HOLDER: ',c.joint)];ad.forEach((a,i)=>right.push((i?'            ':'CUST ADD.   ')+a));
  const n=Math.max(left.length,right.length);for(let i=0;i<n;i++){L.push(left[i]?lab(left[i][0],left[i][1]):'');R.push(right[i]||'')}
  const g=+st.colgap||48;return L.map((l,i)=>(R[i]?l.padEnd(g,' ')+R[i]:l).toUpperCase()).join('\n')}
@@ -175,7 +188,7 @@ function doPrint(c){c=c||CUR;grab&&document.querySelector('[data-k]')&&grab();co
  const pa=$('printArea');pa.innerHTML='<div class="sheet"></div>';const sh=pa.firstChild;cssVars(sh,st);sh.textContent=lines(c,st);setTimeout(()=>window.print(),100)}
 // ---------- settings ----------
 function setView(){hdr();const st=SETK();const fonts=[["'Courier New',monospace",'Courier New'],["Consolas,monospace",'Consolas'],["'Lucida Console',monospace",'Lucida Console'],["Arial,sans-serif",'Arial'],["'Times New Roman',serif",'Times New Roman']];
- CUR=CUR||{name:'NUREFA SAMPLE',acc_no:'5124XXXXXXXX',cust_id:'F600XXXXX',uid:'XXXXXXXXXXXX',co:'C/O: SAMPLE',addr2:'VILLAGE',addr3:'MALDA',addr4:'WEST BENGAL,INDIA PIN-732140',opened:'17-09-2019',issue:today(),operated:'SELF'};
+ if(!CUR||!CUR.name)CUR={name:'NUREFA SAMPLE',acc_no:'5124XXXXXXXX',cust_id:'F600XXXXX',uid:'XXXXXXXXXX6005',gprefix:'C/O',gname:'SAMPLE NAME',vill:'VILL JANAMDOL',post:'PO BISHANPUR',dist:'MALDA',state:'WEST BENGAL',pin:'732140',opened:'17-09-2019',issue:today(),operated:'SELF',nominee:'SAMPLE'};
  const n=(k,l,s)=>`<label>${l}<input type="number" step="${s||1}" data-s="${k}" value="${esc(st[k])}"></label>`,t=(k,l)=>`<label>${l}<input data-s="${k}" value="${esc(st[k])}"></label>`;
  $('app').innerHTML=`<div class="split"><div class="card"><h3 style="margin-top:0">Branch (printed on every page)</h3>${t('branch','Branch name')}${t('ifsc','IFSC code')}${t('baddr1','Br. address 1')}${t('baddr2','Br. address 2')}${t('baddr3','Br. address 3 / PIN')}${t('micr','MICR code')}${t('bemail','Br. email')}
  <h3>Print settings</h3><label>Font<select data-s="ff">${fonts.map(f=>`<option value="${esc(f[0])}" ${f[0]===st.ff?'selected':''}>${f[1]}</option>`).join('')}</select></label>
@@ -200,7 +213,7 @@ async function exp(){const X=await xlsx();const rows=CUST.map(c=>Object.fromEntr
 async function tpl(){const X=await xlsx();const ws=X.utils.aoa_to_sheet([ALL.map(a=>a[1])]);const wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,'Customers');X.writeFile(wb,'passbook-format.xlsx')}
 const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
 async function imp(ev){const f=ev.target.files[0];if(!f)return;const X=await xlsx();const wb=X.read(await f.arrayBuffer());const js=X.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:'',raw:false});
- const map={};const alias={cust_id:['customerid','custid','cif'],name:['accholder','name','accountholder','customername'],acc_no:['accountno','accno','accountnumber'],joint:['jointholder'],co:['address1co','address1','co','address'],addr2:['address2'],addr3:['address3'],addr4:['statepin','pin','address4'],opened:['openedonddmmyyyy','openedon','opened','openingdate'],operated:['operatedby'],nominee:['nominee'],uid:['uidaadhaarno','uid','aadhaar','aadhar','uidno'],pan:['pannumber','pan'],mobile:['mobileno','mobile','phone']};
+ const map={};const alias={cust_id:['cifcustomerid','customerid','custid','cif','cifno'],name:['customername','accholder','name','accountholder'],acc_no:['acno','accountno','accno','accountnumber'],joint:['jointholder'],title:['title'],dob:['dob'],gprefix:['guardianprefix','careofprefix'],gname:['guardianname','careofname'],vill:['address1village','address1','village'],post:['address2post','address2','post'],dist:['districtcity','district'],pin:['pincode','pin'],state:['state'],email:['email','customeremailid'],ckyc:['ckycno','ckyc'],acctype:['accounttype'],nomination:['nomination'],delivery:['passbookdeliverydate'],issue:['issuedate'],occupation:['occupation'],deposit:['initialdeposit'],remarks:['remarks'],apy:['apy'],pmsby:['pmsby'],pmjjy:['pmjjy'],opened:['openedonddmmyyyy','openedon','opened','openingdate'],operated:['operatedby'],nominee:['nomineename','nominee'],uid:['aadhaarno','uidaadhaarno','uid','aadhaar','aadhar','uidno'],pan:['panno','pannumber','pan'],mobile:['mobileno','mobile','phone']};
  const heads=Object.keys(js[0]||{});for(const[k,al]of Object.entries(alias)){const h=heads.find(h=>al.includes(norm(h)));if(h)map[k]=h}
  if(!map.name&&!map.acc_no)return $('ir').innerHTML='<p style="color:#b42318">Column names not recognised. Download "Blank Excel format" and fill your data in it.</p>';
  const byAcc=Object.fromEntries(CUST.filter(c=>c.acc_no).map(c=>[c.acc_no,c.id]));const out=[];
