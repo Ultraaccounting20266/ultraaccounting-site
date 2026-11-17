@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&family=Noto+Sans+Bengali:wght@400;500;600&family=Noto+Nastaliq+Urdu:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&family=Noto+Sans+Bengali:wght@400;500;600&family=Noto+Nastaliq+Urdu:wght@400;500;600&family=Amiri:wght@400&display=swap"
     />
     <style>/* Hark's design tokens and component styles. Each component's rules follow its @component comment. style-gates: data */
 
@@ -806,6 +806,9 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
       .x-credit { font: var(--type-caption); font-family: "Geist", -apple-system, sans-serif; line-height: 1.5; color: var(--text-secondary); margin: 12px 0 0; width: 100%; text-align: center; direction: ltr; unicode-bidi: isolate; }
       .x-credit a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
       @media (pointer: coarse), (max-width: 599px) { .x-credit a { display: inline-flex; align-items: center; justify-content: center; min-height: var(--tap); min-width: var(--tap); } }
+      .x-ar { font-family: "Amiri", "Noto Naskh Arabic", serif; font-size: var(--size-heading); line-height: 2; direction: rtl; text-align: right; margin: 0 0 12px; color: var(--text-primary); }
+      .x-quote-meaning { font: var(--type-body); line-height: var(--lh, 1.5); margin: 0 0 12px; }
+      .x-quote-src { margin: 0; padding-top: 10px; border-top: 1px solid var(--stroke-secondary); }
       .x-map { width: 100%; height: clamp(260px, 40vw, 420px); border: 0; border-radius: var(--r-xl); background: var(--fill-tertiary); display: block; }
     </style>
   <meta name="description" content="Al-Madad Foundation, Chanchal, Malda, West Bengal: a registered public charitable trust (Reg. No. IV-090400009) helping orphans, madrasa students, poor families, widows and flood victims. Donate or contact us.">
@@ -864,6 +867,40 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
                 <div class="row"><dt data-t="fType">Type</dt><dd data-t="fTypeVal">Public Charitable Trust</dd></div>
               </dl>
             </div>
+          </div>
+        </section>
+
+        <section class="section" id="words">
+          <div class="head">
+            <h2 data-t="quotesTitle">Words that guide us</h2>
+          </div>
+          <div class="cards">
+            <div>
+              <p class="x-ar" lang="ar" dir="rtl">«الرَّاحِمُونَ يَرْحَمُهُمُ الرَّحْمَٰنُ، ارْحَمُوا مَنْ فِي الْأَرْضِ يَرْحَمْكُمْ مَنْ فِي السَّمَاءِ»</p>
+              <p class="x-quote-meaning" data-t="q1">“The merciful are shown mercy by the Most Merciful. Be merciful to those on the earth, and the One above the heavens will have mercy on you.”</p>
+              <p class="fineprint x-quote-src" data-t="q1src">Jami' at-Tirmidhi 1924; Sunan Abu Dawud 4941</p>
+            </div>
+            <div>
+              <p class="x-ar" lang="ar" dir="rtl">«وَيُطْعِمُونَ الطَّعَامَ عَلَىٰ حُبِّهِ مِسْكِينًا وَيَتِيمًا وَأَسِيرًا»</p>
+              <p class="x-quote-meaning" data-t="q2">“And they give food, despite their love for it, to the poor, the orphan and the captive.”</p>
+              <p class="fineprint x-quote-src" data-t="q2src">Surah Al-Insan 76:8</p>
+            </div>
+            <div>
+              <p class="x-ar" lang="ar" dir="rtl">«مَّثَلُ الَّذِينَ يُنفِقُونَ أَمْوَالَهُمْ فِي سَبِيلِ اللَّهِ كَمَثَلِ حَبَّةٍ أَنبَتَتْ سَبْعَ سَنَابِلَ فِي كُلِّ سُنبُلَةٍ مِّائَةُ حَبَّةٍ»</p>
+              <p class="x-quote-meaning" data-t="q3">“Those who spend their wealth in the way of Allah are like a grain that grows seven ears, in every ear a hundred grains.”</p>
+              <p class="fineprint x-quote-src" data-t="q3src">Surah Al-Baqarah 2:261</p>
+            </div>
+            <div>
+              <p class="x-ar" lang="ar" dir="rtl">«مَا نَقَصَتْ صَدَقَةٌ مِنْ مَالٍ»</p>
+              <p class="x-quote-meaning" data-t="q4">“Charity never decreases wealth.”</p>
+              <p class="fineprint x-quote-src" data-t="q4src">Sahih Muslim 2588</p>
+            </div>
+          </div>
+          <div class="prose">
+            <p data-t="appeal">Every plate of food, every school book, every helping hand brings comfort to someone who is struggling. Whatever you can give, big or small, reaches an orphan, a widow or a family in need. Join us in this work of mercy.</p>
+          </div>
+          <div class="links">
+            <a class="btn" href="#donate" data-t="btnDonate">Donate</a>
           </div>
         </section>
 
@@ -1142,6 +1179,16 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
             fPan: "ট্রাস্টের PAN",
             fType: "ধরন",
             fTypeVal: "পাবলিক চ্যারিটেবল ট্রাস্ট",
+            quotesTitle: "যে বাণী আমাদের পথ দেখায়",
+            q1: "“দয়াশীলদের প্রতি পরম দয়াময় দয়া করেন। তোমরা পৃথিবীবাসীর প্রতি দয়া করো, তাহলে আসমানের ঊর্ধ্বে যিনি আছেন তিনি তোমাদের প্রতি দয়া করবেন।”",
+            q1src: "জামে তিরমিজি 1924; সুনানে আবু দাউদ 4941",
+            q2: "“আর তারা খাবারের প্রতি নিজেদের ভালোবাসা থাকা সত্ত্বেও অভাবী, এতিম ও বন্দীকে খাবার দেয়।”",
+            q2src: "সূরা আল-ইনসান 76:8",
+            q3: "“যারা আল্লাহর পথে নিজেদের সম্পদ ব্যয় করে, তাদের উপমা একটি শস্যদানার মতো, যা থেকে সাতটি শিষ জন্মায়, প্রতিটি শিষে একশোটি দানা।”",
+            q3src: "সূরা আল-বাকারা 2:261",
+            q4: "“সদকা (দান) কখনো সম্পদ কমায় না।”",
+            q4src: "সহিহ মুসলিম 2588",
+            appeal: "প্রতিটি থালা খাবার, প্রতিটি স্কুলের বই, প্রতিটি সাহায্যের হাত কষ্টে থাকা কোনো মানুষের মনে স্বস্তি আনে। আপনি যা-ই দিতে পারেন, বড় হোক বা ছোট, তা পৌঁছে যায় কোনো এতিম, কোনো বিধবা বা অভাবী কোনো পরিবারের কাছে। রহমতের এই কাজে আমাদের সঙ্গী হোন।",
             workEyebrow: "আমাদের কাজ",
             workTitle: "পরিবারের সবচেয়ে কঠিন সময়ে খাদ্য, ত্রাণ ও সহায়তা।",
             w1h: "কোভিড-19 লকডাউনে ত্রাণ",
@@ -1195,6 +1242,16 @@ tr.is-highlight > :last-child { box-shadow: 12px 0 var(--fill-tertiary); }
             fPan: "ٹرسٹ کا PAN",
             fType: "قسم",
             fTypeVal: "پبلک چیریٹیبل ٹرسٹ",
+            quotesTitle: "وہ کلمات جو ہماری رہنمائی کرتے ہیں",
+            q1: "”رحم کرنے والوں پر رحمٰن رحم فرماتا ہے۔ تم زمین والوں پر رحم کرو، آسمانوں کے اوپر والا تم پر رحم فرمائے گا۔“",
+            q1src: "جامع ترمذی <span class=\"" + L + "\">1924</span>؛ سنن ابی داؤد <span class=\"" + L + "\">4941</span>",
+            q2: "”اور وہ کھانے کی محبت کے باوجود مسکین، یتیم اور قیدی کو کھانا کھلاتے ہیں۔“",
+            q2src: "سورۃ الانسان <span class=\"" + L + "\">76:8</span>",
+            q3: "”جو لوگ اپنا مال اللہ کی راہ میں خرچ کرتے ہیں ان کی مثال اس دانے جیسی ہے جس سے سات بالیاں اگیں، اور ہر بالی میں سو دانے ہوں۔“",
+            q3src: "سورۃ البقرۃ <span class=\"" + L + "\">2:261</span>",
+            q4: "”صدقہ کبھی مال کو کم نہیں کرتا۔“",
+            q4src: "صحیح مسلم <span class=\"" + L + "\">2588</span>",
+            appeal: "کھانے کی ہر تھالی، اسکول کی ہر کتاب، مدد کا ہر ہاتھ کسی مشکل میں گھرے انسان کو سکون پہنچاتا ہے۔ آپ جو کچھ بھی دے سکیں، بڑا ہو یا چھوٹا، وہ کسی یتیم، کسی بیوہ یا کسی ضرورت مند خاندان تک پہنچتا ہے۔ رحمت کے اس کام میں ہمارا ساتھ دیں۔",
             workEyebrow: "ہمارا کام",
             workTitle: "مشکل ترین وقت میں خاندانوں کے لیے کھانا، امداد اور سہارا۔",
             w1h: "کووڈ-19 لاک ڈاؤن میں امداد",
