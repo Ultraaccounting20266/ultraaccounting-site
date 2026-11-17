@@ -23,13 +23,18 @@ tr.c:hover{background:#faf8ff;cursor:pointer}.muted{color:var(--m);font-size:13p
 .sheet{font-family:var(--ff);font-size:var(--fs);font-weight:var(--fw);line-height:1.25;white-space:pre;color:#000;padding:var(--top) 0 0 var(--left)}
 .code{font-family:Consolas,monospace;font-size:20px;letter-spacing:2px;background:#f6f3fd;padding:10px;border-radius:8px;text-align:center}
 #printArea{display:none}
-main{max-width:1400px}.dash{padding:10px}.dg{display:grid;grid-template-columns:1fr 1fr 1fr 150px;gap:10px}.col{display:flex;flex-direction:column;gap:4px}
-.f label{font-size:12px;color:#333;margin-bottom:1px}.f i{color:#d00;font-style:normal}.f input,.f select{padding:7px 9px;border:1px solid #bbb;border-radius:4px;text-transform:uppercase}.f input::placeholder{text-transform:none}
+.sg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-items:start}@media(max-width:1000px){.sg{grid-template-columns:1fr}}
+details{background:#fff;border:1px solid #ccc;border-radius:4px;margin-bottom:6px}summary{padding:12px 14px;cursor:pointer;font-size:15px}.dbody{padding:10px 14px;background:#f2f2f2;border-top:1px solid #ccc}
+.sw{display:flex!important;align-items:center;gap:10px;color:#222!important;font-size:14px!important;margin:7px 0}.sw input{display:none}.sw span{width:42px;height:22px;border-radius:12px;background:#fff;border:2px solid #333;position:relative;flex:none}
+.sw span:after{content:'';position:absolute;width:12px;height:12px;border-radius:50%;background:#111;top:3px;left:4px;transition:.15s}.sw input:checked+span{background:#6d28d9;border-color:#6d28d9}.sw input:checked+span:after{background:#fff;left:22px}
+.rd{display:flex!important;gap:4px;align-items:center;color:#222!important}.rd input{width:auto}.lst div{display:flex;justify-content:space-between;align-items:center;padding:4px 6px;background:#e6e6e6;margin-top:3px}
+main{max-width:1400px;padding:6px}header{padding:6px 12px}.dash{padding:8px;margin:0;display:flex;flex-direction:column;height:calc(100vh - 58px)}.dg{display:grid;grid-template-columns:1fr 1fr 1fr 150px;gap:10px}.col{display:flex;flex-direction:column;gap:4px}
+.col{gap:1px!important}.f label{font-size:11px;color:#333;margin:0;line-height:1.2}.f i{color:#d00;font-style:normal}.f input,.f select{padding:4px 7px;font-size:14px;height:30px;border:1px solid #bbb;border-radius:4px;text-transform:uppercase}.f input::placeholder{text-transform:none}
 .pair{display:grid;grid-template-columns:100px 1fr;gap:4px}.ck{gap:14px;margin:6px 0}.ck label{color:#222;font-size:14px;display:flex;gap:4px;align-items:center}.ck input{width:auto}
-.big{font-size:20px;padding:12px;margin-top:auto;background:#6d28d9;border-radius:4px}.side{display:flex;flex-direction:column;gap:8px}
-.side .g{background:#ddd;color:#111;font-weight:700;border-radius:4px;padding:11px}.side .g:disabled{color:#999;cursor:default}.imp{background:#6d28d9;color:#fff!important;font-weight:700;text-align:center;padding:11px;border-radius:4px;cursor:pointer;font-size:15px}
-.tw{overflow:auto;max-height:420px;border-top:2px solid #6d28d9;margin-top:6px}.tw table{font-size:14px;white-space:nowrap}.tw th{position:sticky;top:0;font-weight:500}tr.sel{background:#ede5ff}
-@media(max-width:1000px){.dg{grid-template-columns:1fr 1fr}.side{flex-direction:row;flex-wrap:wrap;grid-column:1/-1}.side>*{flex:1}}@media(max-width:640px){.dg{grid-template-columns:1fr}}
+.big{font-size:17px;padding:8px;margin-top:auto;background:#6d28d9;border-radius:4px}.side{display:flex;flex-direction:column;gap:8px}
+.side .g{background:#ddd;color:#111;font-weight:700;border-radius:4px;padding:7px}.side .g:disabled{color:#999;cursor:default}.imp{background:#6d28d9;color:#fff!important;font-weight:700;text-align:center;padding:7px;border-radius:4px;cursor:pointer;font-size:15px}
+.tw{overflow:auto;flex:1;min-height:120px;border-top:2px solid #6d28d9;margin-top:6px}.tw table{font-size:14px;white-space:nowrap}.tw th{position:sticky;top:0;font-weight:500}tr.sel{background:#ede5ff}
+@media(max-width:1000px){.dash{height:auto}.tw{max-height:60vh}.dg{grid-template-columns:1fr 1fr}.side{flex-direction:row;flex-wrap:wrap;grid-column:1/-1}.side>*{flex:1}}@media(max-width:640px){.dg{grid-template-columns:1fr}}
 @media print{@page{size:var(--pw) var(--ph);margin:0}body{background:#fff}header,main,#msg{display:none!important}#printArea{display:block}}
 </style><style id="pageCss"></style></head><body>
 <header><h1 id="ttl">UltraAccounting · Passbook</h1><span id="days"></span><span id="hb"></span></header>
@@ -52,7 +57,7 @@ async function dkKey(raw){return crypto.subtle.importKey('raw',raw,'AES-GCM',fal
 function recCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';const r=crypto.getRandomValues(new Uint8Array(16));let s='';r.forEach((v,i)=>{s+=A[v%A.length];if(i%4==3&&i<15)s+='-'});return s}
 // ---------- state ----------
 let S=null,DK=null,DKRAW=null,CUST=[],CUR=null;
-const DEF={branch:'',ifsc:'',baddr1:'',baddr2:'',baddr3:'',micr:'',bemail:'',pw:150,ph:210,ff:"'Courier New',monospace",fs:10,bold:true,top:12,left:6,colgap:48};
+const DEF={branch:'',ifsc:'',baddr1:'',baddr2:'',baddr3:'',micr:'',bemail:'',pw:150,ph:210,ff:"'Courier New',monospace",fs:10,bold:true,top:12,left:6,colgap:48,prtitle:false,fulluid:true,prmobile:true,prnominee:true,casing:'upper'};
 const SETK=()=>Object.assign({},DEF,S.settings||{});
 const store=()=>localStorage.getItem('pb_keep')==='1'?localStorage:sessionStorage;
 function saveSess(){store().setItem('pb_sess',JSON.stringify({S,dk:b64(DKRAW)}))}
@@ -97,20 +102,20 @@ async function doReset(lost){const a=$('n1').value,b=$('n2').value;if(a.length<6
 async function payView(kind){hdr();let st=null;try{const r=await SB.rpc('pb_status',{p_token:S.token});st=r.data}catch(e){}
  const p=(st&&st.pay)||{};const amt=st&&st.price?st.price:0;
  const upi=p.upi?`upi://pay?pa=${encodeURIComponent(p.upi)}&pn=${encodeURIComponent(p.payee||'UltraAccounting')}${amt?'&am='+amt:''}&cu=INR&tn=${encodeURIComponent('Passbook '+S.code)}`:'';
- $('app').innerHTML=`<div class="card" style="max-width:460px;margin:30px auto;text-align:center"><h2 style="margin-top:0">${kind==='BLOCKED'?'Software blocked':'Your plan has expired'}</h2>
+ $('app').innerHTML=`<div class="card" style="max-width:460px;margin:30px auto;text-align:center"><h2 style="margin-top:0">${kind==='BLOCKED'?'Software blocked':kind==='RENEW'?'Renew your plan':'Your plan has expired'}</h2>
  ${kind==='EXPIRED'?`<p>Please pay ${amt?'<b>₹'+amt+'</b> ':''}to continue.</p>${upi?`<img alt="UPI QR" style="width:220px;height:220px" src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upi)}"><p><b>${esc(p.upi)}</b><br>${esc(p.payee||'')}</p>`:''}`:''}
  ${p.msg?`<p>${esc(p.msg)}</p>`:''}<p class="muted">After payment, inform ${p.phone?'<b>'+esc(p.phone)+'</b>':'the owner'}. It will start again once confirmed.</p>
  <div class="row" style="justify-content:center"><button onclick="recheck()">Check again</button><button class="o" onclick="logout()">Logout</button></div></div>`}
 async function recheck(){try{const r=await SB.rpc('pb_status',{p_token:S.token});if(r.error)throw r.error;const st=r.data;S.valid_until=st.valid_until;saveSess();
  const ok=st.active&&(!st.valid_until||st.valid_until>=new Date(Date.now()+19800000).toISOString().slice(0,10));if(ok){toast('Activated');start()}else toast('Not confirmed yet')}catch(e){logout(true)}}
 // ---------- customers ----------
-const OPT={title:['MR','MRS','MS','KUMARI','MASTER','SMT'],gprefix:['S/O','D/O','W/O','C/O'],acctype:['SAVINGS ACCOUNT','BSBD ACCOUNT','CURRENT ACCOUNT','RD ACCOUNT','FD ACCOUNT','JOINT ACCOUNT'],nomination:['REGISTERED','NOT REGISTERED'],occupation:['','STUDENT','HOUSEWIFE','FARMER','LABOUR','BUSINESS','SERVICE','SELF EMPLOYED','RETIRED','OTHERS']};
+const OPT={dist:['MALDA'],state:['WEST BENGAL'],title:['MR','MRS','MS','KUMARI','MASTER','SMT'],gprefix:['S/O','D/O','W/O','C/O'],acctype:['SAVINGS ACCOUNT','BSBD ACCOUNT','CURRENT ACCOUNT','RD ACCOUNT','FD ACCOUNT','JOINT ACCOUNT'],nomination:['REGISTERED','NOT REGISTERED'],occupation:['','STUDENT','HOUSEWIFE','FARMER','LABOUR','BUSINESS','SERVICE','SELF EMPLOYED','RETIRED','OTHERS']};
 const F=[['title','Title'],['name','Customer Name'],['dob','DOB'],['gprefix','Guardian prefix'],['gname','Guardian Name'],['vill','Address1 (Village)'],['post','Address2 (Post)'],['dist','District / City'],['pin','Pincode'],['state','State'],['email','Email'],['acc_no','A/c No.'],['cust_id','CIF / Customer ID'],['ckyc','CKYC No.'],['acctype','Account Type'],['nomination','Nomination'],['nominee','Nominee Name'],['opened','Opening Date'],['issue','Issue Date'],['occupation','Occupation'],['deposit','Initial Deposit'],['delivery','Passbook Delivery Date'],['apy','APY'],['pmsby','PMSBY'],['pmjjy','PMJJY'],['remarks','Remarks'],['operated','Operated by'],['joint','Joint holder']];
 const FE=[['uid','Aadhaar No'],['pan','PAN No'],['mobile','Mobile No']];
-const BLANK=()=>({title:'MR',gprefix:'S/O',dist:'MALDA',state:'WEST BENGAL',acctype:'SAVINGS ACCOUNT',nomination:'REGISTERED',operated:'SELF',issue:today()});
+const BLANK=()=>({title:LST('title')[0],gprefix:LST('gprefix')[0],dist:LST('dist')[0]||'',state:LST('state')[0]||'',acctype:LST('acctype')[0],nomination:'REGISTERED',operated:'SELF',issue:today()});
 async function start(){hdr();await loadC();listView()}
 async function loadC(){try{const rows=await rpc('pb_list',{p_token:S.token});CUST=await Promise.all(rows.map(async r=>{let e={};if(r.enc){try{e=JSON.parse(td.decode(await dec(DK,r.enc)))}catch(x){e={_locked:1}}}return {id:r.id,...r.data,...e,updated_at:r.updated_at}}))}catch(e){if(e.message!=='stop')toast(e.message);throw e}}
-function fi(k,l,req,ph,o){o=o||{};const v=esc(CUR[k]);return `<div class="f"><label>${l}${req?' <i>*</i>':''}</label>${o.sel?`<div class="pair"><select data-k="${o.sel}">${OPT[o.sel].map(x=>`<option${x===CUR[o.sel]?' selected':''}>${x}</option>`).join('')}</select><input data-k="${k}" value="${v}" placeholder="${ph||''}"></div>`:OPT[k]?`<select data-k="${k}">${OPT[k].map(x=>`<option value="${x}"${x===(CUR[k]||'')?' selected':''}>${x||'Select '+l}</option>`).join('')}</select>`:`<input data-k="${k}" value="${v}" placeholder="${ph||''}"${o.dt?' inputmode="numeric" maxlength="10"':''}>`}</div>`}
+function fi(k,l,req,ph,o){o=o||{};const v=esc(CUR[k]);return `<div class="f"><label>${l}${req?' <i>*</i>':''}</label>${o.sel?`<div class="pair"><select data-k="${o.sel}">${LST(o.sel).map(x=>`<option${x===CUR[o.sel]?' selected':''}>${x}</option>`).join('')}</select><input data-k="${k}" value="${v}" placeholder="${ph||''}"></div>`:(OPT[k]&&!['dist','state'].includes(k))?`<select data-k="${k}">${LST(k).map(x=>`<option value="${x}"${x===(CUR[k]||'')?' selected':''}>${x||'Select '+l}</option>`).join('')}</select>`:`<input data-k="${k}" value="${v}" placeholder="${ph||''}"${o.dt?' inputmode="numeric" maxlength="10"':''}${['dist','state'].includes(k)?` list="dl_${k}"`:''}>${['dist','state'].includes(k)?`<datalist id="dl_${k}">${LST(k).map(x=>`<option value="${esc(x)}">`).join('')}</datalist>`:''}`}</div>`}
 function listView(q,keep){hdr();if(!keep)CUR=BLANK();q=q||'';
  $('app').innerHTML=`<div class="card dash"><div class="dg">
  <div class="col">${fi('name','Customer Name',1,'Enter Customer Name',{sel:'title'})}${fi('dob','Dob',0,'DD-MM-YYYY',{dt:1})}${fi('gname','Guardian Name',1,'Enter Guardian Name',{sel:'gprefix'})}${fi('vill','Address1',1,'Enter Village')}${fi('post','Address2',1,'Enter Post')}${fi('dist','District / City',1,'Enter District')}${fi('pin','Pincode',1,'Enter Pincode')}${fi('state','State',1,'Enter State')}${fi('mobile','Mobile No 🔒',0,'Enter Mobile')}${fi('email','Customer Email Id',0,'Enter Customer Email Id')}</div>
@@ -128,7 +133,7 @@ function rows(q){const ql=(q||'').toLowerCase();const L=CUST.filter(c=>!ql||[c.n
  $('tb').innerHTML=L.slice(0,300).map(c=>`<tr class="c${CUR.id===c.id?' sel':''}" onclick="pick('${c.id}')"><td>${n-CUST.indexOf(c)}</td><td>${esc(c.name)}</td><td>${esc(c.acc_no)}</td><td>${esc(c.cust_id)}</td><td>${esc(c.mobile)}</td><td>${esc(c.gprefix)}</td><td>${esc(c.gname)}</td><td>${esc(c.vill)}</td><td>${esc(c.post)}</td><td>${esc(c.dist)}</td><td>${esc(c.state)}</td><td>${esc(fmtUid(c.uid))}</td></tr>`).join('')||'<tr><td colspan=12 class="muted">No customers yet. Fill the form or use Import PDF.</td></tr>'}
 function pick(id){CUR={...CUST.find(c=>c.id===id)};const q=$('q').value;listView(q,1);window.scrollTo(0,0)}
 function edit(id,prt){if(id)pick(id);else listView();if(prt)setTimeout(doPrint,200)}
-function grab(){document.querySelectorAll('[data-k]').forEach(i=>CUR[i.dataset.k]=i.value.trim().toUpperCase());document.querySelectorAll('[data-c]').forEach(i=>CUR[i.dataset.c]=i.checked?'1':'')}
+function grab(){document.querySelectorAll('[data-k]').forEach(i=>CUR[i.dataset.k]=(SETK().casing||'upper')==='upper'?i.value.trim().toUpperCase():i.value.trim());document.querySelectorAll('[data-c]').forEach(i=>CUR[i.dataset.c]=i.checked?'1':'')}
 async function saveCur(prt){grab();if(!CUR.name)return toast('Enter customer name');if(!CUR.acc_no)return toast('Enter account no.');
  const a2=$('acc2');if(a2&&a2.value.trim()!==CUR.acc_no)return toast('Account no. and Confirm A/c No. do not match');
  const dup=CUST.find(c=>c.acc_no===CUR.acc_no&&c.id!==CUR.id);if(dup)return toast('This account no. is already saved: '+dup.name);
@@ -176,10 +181,11 @@ function lines(c,st){const L=[],R=[];const lab=(a,v)=>a+(v||'');
  R[R.length-1]=lab('MICR CODE: ',st.micr);
  L.push(lab('BR. EMAIL  : ',st.bemail));R.push('');
  const ad=addrLines(c);
- const left=[['CUSTOMER ID: ',c.cust_id],['ACCOUNT NO.: ',c.acc_no],['UID NO.    : ',fmtUid(c.uid)],['PAN NUMBER : ',c.pan],['MOBILE NO. : ',c.mobile],['OPENED ON  : ',c.opened],['ISSUE DATE : ',c.issue],['OPERATED BY: ',c.operated||'SELF'],['NOMINEE    : ',c.nominee]];
- const right=[lab('ACC. HOLDER : ',c.name),lab('JOINT HOLDER: ',c.joint)];ad.forEach((a,i)=>right.push((i?'            ':'CUST ADD.   ')+a));
+ const left=[['CUSTOMER ID: ',c.cust_id],['ACCOUNT NO.: ',c.acc_no],['UID NO.    : ',st.fulluid?fmtUid(c.uid):maskUid(c.uid)],['PAN NUMBER : ',c.pan],['MOBILE NO. : ',st.prmobile?c.mobile:''],['OPENED ON  : ',c.opened],['ISSUE DATE : ',c.issue],['OPERATED BY: ',c.operated||'SELF'],['NOMINEE    : ',st.prnominee?c.nominee:'']];
+ const right=[lab('ACC. HOLDER : ',(st.prtitle&&c.title?c.title+' ':'')+(c.name||'')),lab('JOINT HOLDER: ',c.joint)];ad.forEach((a,i)=>right.push((i?'            ':'CUST ADD.   ')+a));
  const n=Math.max(left.length,right.length);for(let i=0;i<n;i++){L.push(left[i]?lab(left[i][0],left[i][1]):'');R.push(right[i]||'')}
- const g=+st.colgap||48;return L.map((l,i)=>(R[i]?l.padEnd(g,' ')+R[i]:l).toUpperCase()).join('\n')}
+ const g=+st.colgap||48;const cs=st.casing||'upper';return L.map((l,i)=>{const x=R[i]?l.padEnd(g,' ')+R[i]:l;return cs==='upper'?x.toUpperCase():cs==='title'?x.toLowerCase().replace(/(^|[\s(\/,.-])([a-z])/g,(m,a,b)=>a+b.toUpperCase()):x}).join('\n')}
+function maskUid(u){u=String(u||'').replace(/\s/g,'');return u.length>=4?'XXXX XXXX '+u.slice(-4):u}
 function fmtUid(u){u=String(u||'').replace(/\s/g,'').toUpperCase();if(/^X+\d{4}$/.test(u))return 'XXXX XXXX '+u.slice(-4);return u.length===12?u.replace(/(\d{4})(\d{4})(\d{4})/,'$1 $2 $3'):u}
 function cssVars(el,st){el.style.setProperty('--ff',st.ff);el.style.setProperty('--fs',st.fs+'pt');el.style.setProperty('--fw',st.bold?'700':'400');el.style.setProperty('--top',st.top+'mm');el.style.setProperty('--left',st.left+'mm')}
 function prev(c){c=c||CUR;const st=SETK();const pv=$('pv');if(!pv)return;pv.style.width=st.pw+'mm';pv.style.height=st.ph+'mm';pv.innerHTML=`<div class="sheet"></div>`;const sh=pv.firstChild;cssVars(sh,st);sh.textContent=lines(c,st)}
@@ -187,19 +193,37 @@ function doPrint(c){c=c||CUR;grab&&document.querySelector('[data-k]')&&grab();co
  $('pageCss').textContent=`@media print{@page{size:${st.pw}mm ${st.ph}mm;margin:0}}`;
  const pa=$('printArea');pa.innerHTML='<div class="sheet"></div>';const sh=pa.firstChild;cssVars(sh,st);sh.textContent=lines(c,st);setTimeout(()=>window.print(),100)}
 // ---------- settings ----------
+function LST(k){const st=SETK();return (st['l_'+k]&&st['l_'+k].length)?st['l_'+k]:OPT[k]}
 function setView(){hdr();const st=SETK();const fonts=[["'Courier New',monospace",'Courier New'],["Consolas,monospace",'Consolas'],["'Lucida Console',monospace",'Lucida Console'],["Arial,sans-serif",'Arial'],["'Times New Roman',serif",'Times New Roman']];
- if(!CUR||!CUR.name)CUR={name:'NUREFA SAMPLE',acc_no:'5124XXXXXXXX',cust_id:'F600XXXXX',uid:'XXXXXXXXXX6005',gprefix:'C/O',gname:'SAMPLE NAME',vill:'VILL JANAMDOL',post:'PO BISHANPUR',dist:'MALDA',state:'WEST BENGAL',pin:'732140',opened:'17-09-2019',issue:today(),operated:'SELF',nominee:'SAMPLE'};
+ if(!CUR||!CUR.name)CUR={title:'MS',name:'NUREFA SAMPLE',acc_no:'5124XXXXXXXX',cust_id:'F600XXXXX',uid:'XXXXXXXXXX6005',mobile:'9000000000',gprefix:'C/O',gname:'SAMPLE NAME',vill:'VILL JANAMDOL',post:'PO BISHANPUR',dist:'MALDA',state:'WEST BENGAL',pin:'732140',opened:'17-09-2019',issue:today(),operated:'SELF',nominee:'SAMPLE'};
  const n=(k,l,s)=>`<label>${l}<input type="number" step="${s||1}" data-s="${k}" value="${esc(st[k])}"></label>`,t=(k,l)=>`<label>${l}<input data-s="${k}" value="${esc(st[k])}"></label>`;
- $('app').innerHTML=`<div class="split"><div class="card"><h3 style="margin-top:0">Branch (printed on every page)</h3>${t('branch','Branch name')}${t('ifsc','IFSC code')}${t('baddr1','Br. address 1')}${t('baddr2','Br. address 2')}${t('baddr3','Br. address 3 / PIN')}${t('micr','MICR code')}${t('bemail','Br. email')}
- <h3>Print settings</h3><label>Font<select data-s="ff">${fonts.map(f=>`<option value="${esc(f[0])}" ${f[0]===st.ff?'selected':''}>${f[1]}</option>`).join('')}</select></label>
- <label style="display:flex;gap:6px;align-items:center;margin-top:6px;color:#333"><input type="checkbox" data-s="bold" style="width:auto" ${st.bold?'checked':''}> Bold font</label>
- <div class="g2">${n('fs','Font size (pt)',0.5)}${n('colgap','Right column starts at (characters)')}${n('top','From top (mm)',0.5)}${n('left','From left (mm)',0.5)}${n('pw','Page width (mm)')}${n('ph','Page height (mm)')}</div>
- <div class="row" style="margin-top:10px"><button onclick="saveSet()">Save</button><button class="o" onclick="saveSet(1)">Default</button><button class="o" onclick="doPrint()">Test print</button></div>
- <p class="muted">Printer: when you click Print, choose EPSON PLQ; Chrome remembers it next time. Keep "Margins: None" and "Scale: 100".</p></div>
- <div class="card"><h3 style="margin-top:0">Preview (sample)</h3><div id="pv"></div></div></div>`;
- document.querySelectorAll('[data-s]').forEach(i=>i.oninput=i.onchange=()=>{S.settings=readSet();prev()});prev()}
-function readSet(){const o=Object.assign({},SETK());document.querySelectorAll('[data-s]').forEach(i=>{const k=i.dataset.s;o[k]=i.type==='checkbox'?i.checked:i.type==='number'?+i.value:i.value});return o}
-async function saveSet(def){const o=def?Object.assign({},DEF,{branch:SETK().branch,ifsc:SETK().ifsc,baddr1:SETK().baddr1,baddr2:SETK().baddr2,baddr3:SETK().baddr3,micr:SETK().micr,bemail:SETK().bemail}):readSet();
+ const sw=(k,l)=>`<label class="sw"><input type="checkbox" data-s="${k}" ${st[k]?'checked':''}><span></span>${l} <b>${st[k]?'ON':'OFF'}</b></label>`;
+ const lists=[['dist','District'],['state','State'],['title','Prefix Settings'],['gprefix','Guardian Prefix Settings'],['occupation','Occupation'],['acctype','Account Type']];
+ const dl=(k,l,o)=>`<details${o?' open':''}><summary>${l}</summary><div class="dbody">${k}</div></details>`;
+ const lst=([k,l])=>dl(`<div class="row"><input id="ln_${k}" placeholder="Enter ${l.replace(' Settings','')}" style="flex:1"><button class="s" onclick="lAdd('${k}')">Add</button></div><div class="lst">${LST(k).filter(Boolean).map((x,i)=>`<div><span>${i+1}&nbsp; ${esc(x)}</span><button class="s r" onclick="lDel('${k}',${i})">Delete</button></div>`).join('')}</div>${k==='acctype'||k==='nomination'?'<p class="muted">First item is selected by default.</p>':''}`,l);
+ const days=S.valid_until?S.valid_until.split('-').reverse().join('-'):'—';
+ $('app').innerHTML=`<div class="sg"><div>
+ ${dl(`${sw('prtitle','Print customer prefix (Mr/Mrs) in passbook')}${sw('fulluid','Print full Aadhaar no in passbook')}${sw('prmobile','Print customer mobile no in passbook')}${sw('prnominee','Print nominee name in passbook')}
+  <div style="margin-top:8px"><label>Casing</label><div class="row">${[['upper','All Capital Letters'],['none','No Change'],['title','Title Case']].map(([v,l])=>`<label class="rd"><input type="radio" name="cs" data-s="casing" value="${v}" ${st.casing===v?'checked':''}> ${l}</label>`).join('')}</div></div>
+  <div class="row" style="margin-top:10px"><button onclick="saveSet()">Save</button></div>`,'Software Settings',1)}
+ ${dl(`<label>Font<select data-s="ff">${fonts.map(f=>`<option value="${esc(f[0])}" ${f[0]===st.ff?'selected':''}>${f[1]}</option>`).join('')}</select></label>
+  ${sw('bold','Bold font')}<div class="g2">${n('fs','Font size (pt)',0.5)}${n('colgap','Right column at (characters)')}${n('top','From top (mm)',0.5)}${n('left','From left (mm)',0.5)}${n('pw','Page width (mm)')}${n('ph','Page height (mm)')}</div>
+  <div class="row" style="margin-top:10px"><button onclick="saveSet()">Save</button><button class="o" onclick="saveSet(1)">Default</button><button class="o" onclick="doPrint()">Test print</button></div>
+  <p class="muted">In the print box choose EPSON PLQ-20, Margins: None, Scale: 100.</p><div id="pv"></div>`,'Print Settings & Preview')}
+ </div><div>${lists.map(lst).join('')}</div><div>
+ ${dl(`${t('branch','Branch / BC name')}${t('ifsc','IFSC code')}${t('baddr1','Br. address 1')}${t('baddr2','Br. address 2')}${t('baddr3','Br. address 3 / PIN')}${t('micr','MICR code')}${t('bemail','Br. email')}<div class="row" style="margin-top:10px"><button onclick="saveSet()">Save</button></div>`,'Bc Name And Location')}
+ ${dl(`<label>Old password<input id="op" type="password"></label><label>New password (min 6)<input id="np1" type="password"></label><label>Confirm new password<input id="np2" type="password"></label><div class="row" style="margin-top:10px"><button onclick="chgPass()">Change Password</button></div>`,'Change Password')}
+ ${dl(`<p class="muted">Download all customers to Excel, or import from Excel.</p><button onclick="bkView()">Open Backup / Excel</button>`,'Backup and Restore data')}
+ ${dl(`<div style="line-height:1.7">Registered details as of: ${today()}<br>Shop name: <b>${esc(S.name)}</b><br>Shop ID: <b>${esc(S.code)}</b><br>Plan: Passbook Printer<br>Valid till: <b>${days}</b><br><br>For support: Owner, UltraAccounting<br>Call / WhatsApp: <a href="tel:7602292599">7602292599</a></div>`,'Registered Details',1)}
+ <button style="width:100%;margin-top:8px;padding:11px" onclick="payView('RENEW')">Renewal</button></div></div>`;
+ document.querySelectorAll('[data-s]').forEach(i=>i.oninput=i.onchange=()=>{S.settings=readSet();prev();const b=i.parentNode.querySelector('b');if(i.type==='checkbox'&&b)b.textContent=i.checked?'ON':'OFF'});prev()}
+async function lAdd(k){const v=$('ln_'+k).value.trim().toUpperCase();if(!v)return;const a=[...LST(k)];if(!a.includes(v))a.push(v);await saveList(k,a)}
+async function lDel(k,i){const a=LST(k).filter(Boolean);if(!confirm('Delete '+a[i]+'?'))return;a.splice(i,1);await saveList(k,a)}
+async function saveList(k,a){const o=Object.assign({},SETK(),{['l_'+k]:a});try{await rpc('pb_settings',{p_token:S.token,p_settings:o})}catch(x){if(x.message!=='stop')toast(x.message);return}S.settings=o;saveSess();toast('Saved');setView();const d=[...document.querySelectorAll('details')].find(d=>d.querySelector('#ln_'+k));if(d)d.open=true}
+async function chgPass(){const o=$('op').value,a=$('np1').value,b=$('np2').value;if(a.length<6)return toast(ERR.PASSWORD_TOO_SHORT);if(a!==b)return toast('Passwords do not match');
+ try{await rpc('pb_set_pass',{p_token:S.token,p_old:o,p_new:a,p_wrap_pw:await enc(await kdf(a,'pw:'+S.code),DKRAW),p_wrap_rec:null})}catch(e){if(e.message!=='stop')toast(e.message);return}LPASS=a;toast('Password changed');setView()}
+function readSet(){const o=Object.assign({},SETK());document.querySelectorAll('[data-s]').forEach(i=>{const k=i.dataset.s;if(i.type==='radio'&&!i.checked)return;o[k]=i.type==='checkbox'?i.checked:i.type==='number'?+i.value:i.value});return o}
+async function saveSet(def){const K=SETK();const o=def?Object.assign({},DEF,Object.fromEntries(Object.entries(K).filter(([k])=>k.startsWith('l_'))),{prtitle:K.prtitle,fulluid:K.fulluid,prmobile:K.prmobile,prnominee:K.prnominee,casing:K.casing},{branch:SETK().branch,ifsc:SETK().ifsc,baddr1:SETK().baddr1,baddr2:SETK().baddr2,baddr3:SETK().baddr3,micr:SETK().micr,bemail:SETK().bemail}):readSet();
  try{await rpc('pb_settings',{p_token:S.token,p_settings:o})}catch(x){if(x.message!=='stop')toast(x.message);return}S.settings=o;saveSess();toast('Settings saved');setView()}
 // ---------- excel ----------
 let XL=null;async function xlsx(){if(XL)return XL;await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';s.onload=ok;s.onerror=no;document.head.appendChild(s)});return XL=window.XLSX}
