@@ -32,7 +32,7 @@ tr.c:hover{background:#faf8ff;cursor:pointer}.muted{color:var(--m);font-size:13p
 const SB=supabase.createClient('https://ochdzpcxrhlzloxbnzua.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jaGR6cGN4cmhsemxveGJuenVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0ODMyNDgsImV4cCI6MjEwOTA1OTI0OH0.ydBBoTuNF1qsQMYN0LMS4GZbie98iZ60Bj0et0-jWcw',{auth:{persistSession:false}});
 const $=id=>document.getElementById(id);const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function toast(t){const m=$('msg');m.textContent=t;m.style.display='block';clearTimeout(m._t);m._t=setTimeout(()=>m.style.display='none',3500)}
-const ERR={WRONG_LOGIN:'Shop ID ya password galat hai',BLOCKED:'Yeh dukaan band hai. UltraAccounting se baat karein.',EXPIRED:'Plan khatam ho gaya',LOGIN_EXPIRED:'Dobara login karein',WRONG_OLD_PASSWORD:'Purana password galat',PASSWORD_TOO_SHORT:'Password kam se kam 6 akshar'};
+const ERR={WRONG_LOGIN:'Wrong Shop ID or password',BLOCKED:'This shop is blocked. Please contact UltraAccounting.',EXPIRED:'Plan expired',LOGIN_EXPIRED:'Please log in again',WRONG_OLD_PASSWORD:'Old password is wrong',PASSWORD_TOO_SHORT:'Password must be at least 6 characters'};
 async function rpc(fn,args){const {data,error}=await SB.rpc(fn,args);if(error){const k=(error.message||'').trim();if(k==='EXPIRED'||k==='BLOCKED'){await payView(k);throw new Error('stop')}if(k==='LOGIN_EXPIRED'){logout(true);throw new Error('stop')}throw new Error(ERR[k]||k)}return data}
 // ---------- crypto ----------
 const te=new TextEncoder(),td=new TextDecoder();
@@ -50,79 +50,79 @@ const SETK=()=>Object.assign({},DEF,S.settings||{});
 const store=()=>localStorage.getItem('pb_keep')==='1'?localStorage:sessionStorage;
 function saveSess(){store().setItem('pb_sess',JSON.stringify({S,dk:b64(DKRAW)}))}
 async function restore(){const j=localStorage.getItem('pb_sess')||sessionStorage.getItem('pb_sess');if(!j)return false;try{const o=JSON.parse(j);S=o.S;DKRAW=ub64(o.dk);DK=await dkKey(DKRAW);return true}catch(e){return false}}
-function logout(silent){if(S&&!silent)SB.rpc('pb_logout',{p_token:S.token});localStorage.removeItem('pb_sess');sessionStorage.removeItem('pb_sess');S=null;DK=null;loginView();if(silent)toast('Dobara login karein')}
+function logout(silent){if(S&&!silent)SB.rpc('pb_logout',{p_token:S.token});localStorage.removeItem('pb_sess');sessionStorage.removeItem('pb_sess');S=null;DK=null;loginView();if(silent)toast('Please log in again')}
 // ---------- views ----------
 function hdr(){if(!S){$('ttl').textContent='UltraAccounting · Passbook';$('days').innerHTML='';$('hb').innerHTML='';return}
- $('ttl').textContent=S.name+' · Passbook';let d='';if(S.valid_until){const n=Math.round((new Date(S.valid_until+'T23:59:59')-new Date())/864e5);d=`<span class="chip ${n<0?'x':n<=7?'w':''}">${n<0?'Plan khatam':n+' din baki'}</span>`}$('days').innerHTML=d;
+ $('ttl').textContent=S.name+' · Passbook';let d='';if(S.valid_until){const n=Math.round((new Date(S.valid_until+'T23:59:59')-new Date())/864e5);d=`<span class="chip ${n<0?'x':n<=7?'w':''}">${n<0?'Plan expired':n+' days left'}</span>`}$('days').innerHTML=d;
  $('hb').innerHTML=`<button class="s" onclick="listView()">Customers</button> <button class="s" onclick="setView()">Settings</button> <button class="s" onclick="bkView()">Excel / Backup</button> <button class="s" onclick="logout()">Logout</button>`}
-function loginView(){hdr();$('app').innerHTML=`<div class="card" style="max-width:400px;margin:40px auto"><h2 style="margin-top:0">Dukaan login</h2>
+function loginView(){hdr();$('app').innerHTML=`<div class="card" style="max-width:400px;margin:40px auto"><h2 style="margin-top:0">Shop login</h2>
  <label>Shop ID<input id="lc" autocomplete="username"></label><label style="margin-top:8px">Password<input id="lp" type="password" autocomplete="current-password"></label>
- <label style="margin-top:8px;display:flex;gap:6px;align-items:center;color:#333"><input type="checkbox" id="lk" style="width:auto" checked> Is computer par login yaad rakho</label>
- <div style="margin-top:10px"><button onclick="doLogin()">Login</button></div><p class="muted">Shop ID aur password UltraAccounting (SK Nuruddin) se milega.</p></div>`;
+ <label style="margin-top:8px;display:flex;gap:6px;align-items:center;color:#333"><input type="checkbox" id="lk" style="width:auto" checked> Keep me logged in on this computer</label>
+ <div style="margin-top:10px"><button onclick="doLogin()">Login</button></div><p class="muted">Shop ID and password are given by the Owner, UltraAccounting.<br>Call / WhatsApp: <a href="tel:+917602292599">7602292599</a></p></div>`;
  $('lp').onkeydown=e=>{if(e.key==='Enter')doLogin()}}
 let LPASS='';
 async function doLogin(){const c=$('lc').value.trim().toLowerCase(),p=$('lp').value;if(!c||!p)return;localStorage.setItem('pb_keep',$('lk').checked?'1':'0');
  try{S=await rpc('pb_login',{p_code:c,p_pass:p})}catch(e){if(e.message!=='stop')toast(e.message);return}LPASS=p;
  if(S.must_change&&!S.wrap_pw)return firstView();
  if(S.must_change)return resetView();
- try{DKRAW=await dec(await kdf(p,'pw:'+S.code),S.wrap_pw);DK=await dkKey(DKRAW)}catch(e){toast('Data chabi nahi khuli');return}
+ try{DKRAW=await dec(await kdf(p,'pw:'+S.code),S.wrap_pw);DK=await dkKey(DKRAW)}catch(e){toast('Could not unlock data');return}
  saveSess();start()}
-function firstView(){hdr();$('app').innerHTML=`<div class="card" style="max-width:460px;margin:30px auto"><h2 style="margin-top:0">Pehli baar: apna password rakhein</h2>
- <label>Naya password (kam se kam 6)<input id="n1" type="password"></label><label style="margin-top:8px">Dobara likhein<input id="n2" type="password"></label>
+function firstView(){hdr();$('app').innerHTML=`<div class="card" style="max-width:460px;margin:30px auto"><h2 style="margin-top:0">First time: set your password</h2>
+ <label>New password (min 6 characters)<input id="n1" type="password"></label><label style="margin-top:8px">Confirm password<input id="n2" type="password"></label>
  <div style="margin-top:10px"><button onclick="doFirst()">Save</button></div></div>`}
-async function doFirst(){const a=$('n1').value,b=$('n2').value;if(a.length<6)return toast(ERR.PASSWORD_TOO_SHORT);if(a!==b)return toast('Dono password alag hain');
+async function doFirst(){const a=$('n1').value,b=$('n2').value;if(a.length<6)return toast(ERR.PASSWORD_TOO_SHORT);if(a!==b)return toast('Passwords do not match');
  DKRAW=crypto.getRandomValues(new Uint8Array(32));DK=await dkKey(DKRAW);const rc=recCode();
  try{await rpc('pb_set_pass',{p_token:S.token,p_old:LPASS,p_new:a,p_wrap_pw:await enc(await kdf(a,'pw:'+S.code),DKRAW),p_wrap_rec:await enc(await kdf(rc,'rec:'+S.code),DKRAW)})}catch(e){if(e.message!=='stop')toast(e.message);return}
  S.must_change=false;saveSess();
- $('app').innerHTML=`<div class="card" style="max-width:480px;margin:30px auto"><h2 style="margin-top:0">Recovery code likh lein</h2><p>Password bhool gaye toh Aadhaar, PAN, mobile wapas kholne ke liye yeh code chahiye. Ise kaagaz par likh kar rakhein, kisi ko na dein.</p><div class="code">${rc}</div><div style="margin-top:12px"><button onclick="start()">Likh liya, aage chalo</button></div></div>`}
-function resetView(){hdr();$('app').innerHTML=`<div class="card" style="max-width:480px;margin:30px auto"><h2 style="margin-top:0">Password reset hua hai</h2>
- <p class="muted">Recovery code daalein (jo pehli baar mila tha), aur naya password rakhein.</p>
- <label>Recovery code<input id="rc" placeholder="XXXX-XXXX-XXXX-XXXX"></label><label style="margin-top:8px">Naya password<input id="n1" type="password"></label><label style="margin-top:8px">Dobara likhein<input id="n2" type="password"></label>
- <div class="row" style="margin-top:10px"><button onclick="doReset(false)">Save</button><button class="o s" onclick="doReset(true)">Recovery code nahi hai</button></div></div>`}
-async function doReset(lost){const a=$('n1').value,b=$('n2').value;if(a.length<6)return toast(ERR.PASSWORD_TOO_SHORT);if(a!==b)return toast('Dono password alag hain');
+ $('app').innerHTML=`<div class="card" style="max-width:480px;margin:30px auto"><h2 style="margin-top:0">Write down your recovery code</h2><p>If you forget your password, you need this code to unlock Aadhaar, PAN and mobile again. Write it on paper and keep it safe. Do not share it.</p><div class="code">${rc}</div><div style="margin-top:12px"><button onclick="start()">I have written it, continue</button></div></div>`}
+function resetView(){hdr();$('app').innerHTML=`<div class="card" style="max-width:480px;margin:30px auto"><h2 style="margin-top:0">Your password was reset</h2>
+ <p class="muted">Enter the recovery code you got the first time, then set a new password.</p>
+ <label>Recovery code<input id="rc" placeholder="XXXX-XXXX-XXXX-XXXX"></label><label style="margin-top:8px">New password<input id="n1" type="password"></label><label style="margin-top:8px">Confirm password<input id="n2" type="password"></label>
+ <div class="row" style="margin-top:10px"><button onclick="doReset(false)">Save</button><button class="o s" onclick="doReset(true)">I don't have the recovery code</button></div></div>`}
+async function doReset(lost){const a=$('n1').value,b=$('n2').value;if(a.length<6)return toast(ERR.PASSWORD_TOO_SHORT);if(a!==b)return toast('Passwords do not match');
  let rc=null;
- if(lost){if(!confirm('Bina recovery code ke purane customers ka Aadhaar, PAN, mobile khaali ho jayega (baaki details rahengi). Aage badhein?'))return;DKRAW=crypto.getRandomValues(new Uint8Array(32));rc=recCode()}
- else{try{DKRAW=await dec(await kdf($('rc').value.trim().toUpperCase(),'rec:'+S.code),S.wrap_rec)}catch(e){return toast('Recovery code galat hai')}}
+ if(lost){if(!confirm('Without the recovery code, Aadhaar, PAN and mobile of old customers will be cleared (other details stay). Continue?'))return;DKRAW=crypto.getRandomValues(new Uint8Array(32));rc=recCode()}
+ else{try{DKRAW=await dec(await kdf($('rc').value.trim().toUpperCase(),'rec:'+S.code),S.wrap_rec)}catch(e){return toast('Wrong recovery code')}}
  DK=await dkKey(DKRAW);
  try{await rpc('pb_set_pass',{p_token:S.token,p_old:LPASS,p_new:a,p_wrap_pw:await enc(await kdf(a,'pw:'+S.code),DKRAW),p_wrap_rec:rc?await enc(await kdf(rc,'rec:'+S.code),DKRAW):null})}catch(e){if(e.message!=='stop')toast(e.message);return}
  S.must_change=false;saveSess();
- if(rc){$('app').innerHTML=`<div class="card" style="max-width:480px;margin:30px auto"><h2 style="margin-top:0">Naya recovery code</h2><div class="code">${rc}</div><div style="margin-top:12px"><button onclick="start()">Likh liya</button></div></div>`}else start()}
+ if(rc){$('app').innerHTML=`<div class="card" style="max-width:480px;margin:30px auto"><h2 style="margin-top:0">New recovery code</h2><div class="code">${rc}</div><div style="margin-top:12px"><button onclick="start()">I have written it</button></div></div>`}else start()}
 async function payView(kind){hdr();let st=null;try{const r=await SB.rpc('pb_status',{p_token:S.token});st=r.data}catch(e){}
  const p=(st&&st.pay)||{};const amt=st&&st.price?st.price:0;
  const upi=p.upi?`upi://pay?pa=${encodeURIComponent(p.upi)}&pn=${encodeURIComponent(p.payee||'UltraAccounting')}${amt?'&am='+amt:''}&cu=INR&tn=${encodeURIComponent('Passbook '+S.code)}`:'';
- $('app').innerHTML=`<div class="card" style="max-width:460px;margin:30px auto;text-align:center"><h2 style="margin-top:0">${kind==='BLOCKED'?'Software band hai':'Plan khatam ho gaya'}</h2>
- ${kind==='EXPIRED'?`<p>Aage chalane ke liye ${amt?'<b>₹'+amt+'</b> ':''}payment karein.</p>${upi?`<img alt="UPI QR" style="width:220px;height:220px" src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upi)}"><p><b>${esc(p.upi)}</b><br>${esc(p.payee||'')}</p>`:''}`:''}
- ${p.msg?`<p>${esc(p.msg)}</p>`:''}<p class="muted">Payment ke baad ${p.phone?'<b>'+esc(p.phone)+'</b> par ':''}batayein. Confirm hote hi chalu ho jayega.</p>
- <div class="row" style="justify-content:center"><button onclick="recheck()">Dobara check karo</button><button class="o" onclick="logout()">Logout</button></div></div>`}
+ $('app').innerHTML=`<div class="card" style="max-width:460px;margin:30px auto;text-align:center"><h2 style="margin-top:0">${kind==='BLOCKED'?'Software blocked':'Your plan has expired'}</h2>
+ ${kind==='EXPIRED'?`<p>Please pay ${amt?'<b>₹'+amt+'</b> ':''}to continue.</p>${upi?`<img alt="UPI QR" style="width:220px;height:220px" src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upi)}"><p><b>${esc(p.upi)}</b><br>${esc(p.payee||'')}</p>`:''}`:''}
+ ${p.msg?`<p>${esc(p.msg)}</p>`:''}<p class="muted">After payment, inform ${p.phone?'<b>'+esc(p.phone)+'</b>':'the owner'}. It will start again once confirmed.</p>
+ <div class="row" style="justify-content:center"><button onclick="recheck()">Check again</button><button class="o" onclick="logout()">Logout</button></div></div>`}
 async function recheck(){try{const r=await SB.rpc('pb_status',{p_token:S.token});if(r.error)throw r.error;const st=r.data;S.valid_until=st.valid_until;saveSess();
- const ok=st.active&&(!st.valid_until||st.valid_until>=new Date(Date.now()+19800000).toISOString().slice(0,10));if(ok){toast('Chalu ho gaya');start()}else toast('Abhi confirm nahi hua')}catch(e){logout(true)}}
+ const ok=st.active&&(!st.valid_until||st.valid_until>=new Date(Date.now()+19800000).toISOString().slice(0,10));if(ok){toast('Activated');start()}else toast('Not confirmed yet')}catch(e){logout(true)}}
 // ---------- customers ----------
 const F=[['cust_id','Customer ID'],['name','Acc. holder'],['acc_no','Account no.'],['joint','Joint holder'],['co','Address 1 (C/O)'],['addr2','Address 2'],['addr3','Address 3'],['addr4','State / PIN'],['opened','Opened on (DD-MM-YYYY)'],['operated','Operated by'],['nominee','Nominee']];
 const FE=[['uid','UID / Aadhaar no.'],['pan','PAN number'],['mobile','Mobile no.']];
 async function start(){hdr();await loadC();listView()}
 async function loadC(){try{const rows=await rpc('pb_list',{p_token:S.token});CUST=await Promise.all(rows.map(async r=>{let e={};if(r.enc){try{e=JSON.parse(td.decode(await dec(DK,r.enc)))}catch(x){e={_locked:1}}}return {id:r.id,...r.data,...e,updated_at:r.updated_at}}))}catch(e){if(e.message!=='stop')toast(e.message);throw e}}
 function listView(q){hdr();q=q||'';const ql=q.toLowerCase();const L=CUST.filter(c=>!ql||[c.name,c.acc_no,c.cust_id,c.mobile,c.co].join(' ').toLowerCase().includes(ql));
- $('app').innerHTML=`<div class="card"><div class="row"><input id="q" placeholder="Naam, account no., customer ID se khojein" style="flex:1;min-width:220px" value="${esc(q)}"><button onclick="edit()">+ Naya customer</button></div>
- <p class="muted">${CUST.length} customer saved</p><table><tr><th>Customer ID</th><th>Naam</th><th>Account no.</th><th>Opened</th><th></th></tr>
- ${L.slice(0,300).map(c=>`<tr class="c" onclick="edit('${c.id}')"><td>${esc(c.cust_id)}</td><td><b>${esc(c.name)}</b></td><td>${esc(c.acc_no)}</td><td>${esc(c.opened)}</td><td><button class="s" onclick="event.stopPropagation();edit('${c.id}',1)">Print</button></td></tr>`).join('')||'<tr><td colspan=5 class="muted">Koi customer nahi. "+ Naya customer" dabayein ya Excel se import karein.</td></tr>'}</table></div>`;
+ $('app').innerHTML=`<div class="card"><div class="row"><input id="q" placeholder="Search by name, account no., customer ID" style="flex:1;min-width:220px" value="${esc(q)}"><button onclick="edit()">+ New customer</button></div>
+ <p class="muted">${CUST.length} customers saved</p><table><tr><th>Customer ID</th><th>Name</th><th>Account no.</th><th>Opened</th><th></th></tr>
+ ${L.slice(0,300).map(c=>`<tr class="c" onclick="edit('${c.id}')"><td>${esc(c.cust_id)}</td><td><b>${esc(c.name)}</b></td><td>${esc(c.acc_no)}</td><td>${esc(c.opened)}</td><td><button class="s" onclick="event.stopPropagation();edit('${c.id}',1)">Print</button></td></tr>`).join('')||'<tr><td colspan=5 class="muted">No customers yet. Click "+ New customer" or import from Excel.</td></tr>'}</table></div>`;
  const qi=$('q');qi.oninput=()=>{const v=qi.value;clearTimeout(qi._t);qi._t=setTimeout(()=>{listView(v);const n=$('q');n.focus();n.setSelectionRange(v.length,v.length)},250)}}
 function today(){const d=new Date();return String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+d.getFullYear()}
 function edit(id,prt){CUR=id?{...CUST.find(c=>c.id===id)}:{operated:'SELF'};CUR.issue=today();hdr();
- $('app').innerHTML=`<div class="split"><div class="card"><h3 style="margin-top:0">${id?'Customer':'Naya customer'}</h3>
+ $('app').innerHTML=`<div class="split"><div class="card"><h3 style="margin-top:0">${id?'Customer':'New customer'}</h3>
  ${F.map(([k,l])=>`<label style="margin-top:6px">${l}<input data-k="${k}" value="${esc(CUR[k])}"></label>`).join('')}
  ${FE.map(([k,l])=>`<label style="margin-top:6px">${l} 🔒<input data-k="${k}" value="${esc(CUR[k])}"></label>`).join('')}
  <label style="margin-top:6px">Issue date<input data-k="issue" value="${esc(CUR.issue)}"></label>
  <div class="row" style="margin-top:10px"><button onclick="saveCur()">Save</button><button onclick="saveCur(1)">Save + Print</button><button class="o" onclick="listView()">Back</button>${id?`<button class="r s" onclick="delCur()">Delete</button>`:''}</div>
- <p class="muted">🔒 wale khane aapke password se lock hokar cloud mein jaate hain.</p></div>
- <div class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">Print preview</h3><button onclick="doPrint()">🖨 Print</button></div><p class="muted">Preview passbook page ke size mein hai. Jagah aage-peeche karni ho toh Settings mein.</p><div id="pv"></div></div></div>`;
+ <p class="muted">🔒 fields are locked with your password before saving to the cloud.</p></div>
+ <div class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">Print preview</h3><button onclick="doPrint()">🖨 Print</button></div><p class="muted">Preview is at passbook page size. To shift the position, use Settings.</p><div id="pv"></div></div></div>`;
  document.querySelectorAll('[data-k]').forEach(i=>i.oninput=()=>{CUR[i.dataset.k]=i.value;prev()});prev();if(prt)setTimeout(doPrint,300)}
 function grab(){document.querySelectorAll('[data-k]').forEach(i=>CUR[i.dataset.k]=i.value.trim())}
-async function saveCur(prt){grab();if(!CUR.name&&!CUR.acc_no)return toast('Naam ya account no. daalein');
+async function saveCur(prt){grab();if(!CUR.name&&!CUR.acc_no)return toast('Enter name or account no.');
  const data={};F.forEach(([k])=>data[k]=CUR[k]||'');const e={};FE.forEach(([k])=>e[k]=CUR[k]||'');
  const id=CUR.id||crypto.randomUUID();
  try{await rpc('pb_save',{p_token:S.token,p_rows:[{id,data,enc:await enc(DK,te.encode(JSON.stringify(e)))}]})}catch(x){if(x.message!=='stop')toast(x.message);return}
- CUR.id=id;const i=CUST.findIndex(c=>c.id===id);const rec={id,...data,...e};if(i>=0)CUST[i]=rec;else CUST.unshift(rec);toast('Save ho gaya');if(prt)doPrint()}
-async function delCur(){if(!confirm('Is customer ko delete karein?'))return;try{await rpc('pb_delete',{p_token:S.token,p_id:CUR.id})}catch(x){if(x.message!=='stop')toast(x.message);return}CUST=CUST.filter(c=>c.id!==CUR.id);toast('Delete ho gaya');listView()}
+ CUR.id=id;const i=CUST.findIndex(c=>c.id===id);const rec={id,...data,...e};if(i>=0)CUST[i]=rec;else CUST.unshift(rec);toast('Saved');if(prt)doPrint()}
+async function delCur(){if(!confirm('Delete this customer?'))return;try{await rpc('pb_delete',{p_token:S.token,p_id:CUR.id})}catch(x){if(x.message!=='stop')toast(x.message);return}CUST=CUST.filter(c=>c.id!==CUR.id);toast('Deleted');listView()}
 // ---------- layout ----------
 function lines(c,st){const L=[],R=[];const lab=(a,v)=>a+(v||'');
  L.push(lab('BRANCH NAME: ',st.branch));R.push(lab('IFSC CODE: ',st.ifsc));
@@ -145,24 +145,24 @@ function doPrint(c){c=c||CUR;grab&&document.querySelector('[data-k]')&&grab();co
 function setView(){hdr();const st=SETK();const fonts=[["'Courier New',monospace",'Courier New'],["Consolas,monospace",'Consolas'],["'Lucida Console',monospace",'Lucida Console'],["Arial,sans-serif",'Arial'],["'Times New Roman',serif",'Times New Roman']];
  CUR=CUR||{name:'NUREFA SAMPLE',acc_no:'5124XXXXXXXX',cust_id:'F600XXXXX',uid:'XXXXXXXXXXXX',co:'C/O: SAMPLE',addr2:'VILLAGE',addr3:'MALDA',addr4:'WEST BENGAL,INDIA PIN-732140',opened:'17-09-2019',issue:today(),operated:'SELF'};
  const n=(k,l,s)=>`<label>${l}<input type="number" step="${s||1}" data-s="${k}" value="${esc(st[k])}"></label>`,t=(k,l)=>`<label>${l}<input data-s="${k}" value="${esc(st[k])}"></label>`;
- $('app').innerHTML=`<div class="split"><div class="card"><h3 style="margin-top:0">Branch (har page par)</h3>${t('branch','Branch name')}${t('ifsc','IFSC code')}${t('baddr1','Br. address 1')}${t('baddr2','Br. address 2')}${t('baddr3','Br. address 3 / PIN')}${t('micr','MICR code')}${t('bemail','Br. email')}
- <h3>Print setting</h3><label>Font<select data-s="ff">${fonts.map(f=>`<option value="${esc(f[0])}" ${f[0]===st.ff?'selected':''}>${f[1]}</option>`).join('')}</select></label>
+ $('app').innerHTML=`<div class="split"><div class="card"><h3 style="margin-top:0">Branch (printed on every page)</h3>${t('branch','Branch name')}${t('ifsc','IFSC code')}${t('baddr1','Br. address 1')}${t('baddr2','Br. address 2')}${t('baddr3','Br. address 3 / PIN')}${t('micr','MICR code')}${t('bemail','Br. email')}
+ <h3>Print settings</h3><label>Font<select data-s="ff">${fonts.map(f=>`<option value="${esc(f[0])}" ${f[0]===st.ff?'selected':''}>${f[1]}</option>`).join('')}</select></label>
  <label style="display:flex;gap:6px;align-items:center;margin-top:6px;color:#333"><input type="checkbox" data-s="bold" style="width:auto" ${st.bold?'checked':''}> Bold font</label>
- <div class="g2">${n('fs','Font size (pt)',0.5)}${n('colgap','Right column kahan se (akshar)')}${n('top','Upar se (mm)',0.5)}${n('left','Left se (mm)',0.5)}${n('pw','Page width (mm)')}${n('ph','Page height (mm)')}</div>
+ <div class="g2">${n('fs','Font size (pt)',0.5)}${n('colgap','Right column starts at (characters)')}${n('top','From top (mm)',0.5)}${n('left','From left (mm)',0.5)}${n('pw','Page width (mm)')}${n('ph','Page height (mm)')}</div>
  <div class="row" style="margin-top:10px"><button onclick="saveSet()">Save</button><button class="o" onclick="saveSet(1)">Default</button><button class="o" onclick="doPrint()">Test print</button></div>
- <p class="muted">Printer: Print dabane par EPSON PLQ chunein, Chrome agli baar wahi yaad rakhega. "Margins: None" aur "Scale: 100" rakhein.</p></div>
+ <p class="muted">Printer: when you click Print, choose EPSON PLQ; Chrome remembers it next time. Keep "Margins: None" and "Scale: 100".</p></div>
  <div class="card"><h3 style="margin-top:0">Preview (sample)</h3><div id="pv"></div></div></div>`;
  document.querySelectorAll('[data-s]').forEach(i=>i.oninput=i.onchange=()=>{S.settings=readSet();prev()});prev()}
 function readSet(){const o=Object.assign({},SETK());document.querySelectorAll('[data-s]').forEach(i=>{const k=i.dataset.s;o[k]=i.type==='checkbox'?i.checked:i.type==='number'?+i.value:i.value});return o}
 async function saveSet(def){const o=def?Object.assign({},DEF,{branch:SETK().branch,ifsc:SETK().ifsc,baddr1:SETK().baddr1,baddr2:SETK().baddr2,baddr3:SETK().baddr3,micr:SETK().micr,bemail:SETK().bemail}):readSet();
- try{await rpc('pb_settings',{p_token:S.token,p_settings:o})}catch(x){if(x.message!=='stop')toast(x.message);return}S.settings=o;saveSess();toast('Settings save');setView()}
+ try{await rpc('pb_settings',{p_token:S.token,p_settings:o})}catch(x){if(x.message!=='stop')toast(x.message);return}S.settings=o;saveSess();toast('Settings saved');setView()}
 // ---------- excel ----------
 let XL=null;async function xlsx(){if(XL)return XL;await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';s.onload=ok;s.onerror=no;document.head.appendChild(s)});return XL=window.XLSX}
 const ALL=[...F,...FE];
 function bkView(){hdr();$('app').innerHTML=`<div class="card"><h3 style="margin-top:0">Excel / Backup</h3>
- <div class="row"><button onclick="exp()">⬇ Sab customer Excel mein (backup)</button><button class="o" onclick="tpl()">Khali Excel format</button></div>
- <p class="muted">Backup file aapke computer ke Downloads mein aayegi. Pendrive ya Google Drive mein bhi rakh lein.</p>
- <h3>Excel se import</h3><input type="file" id="xf" accept=".xlsx,.xls,.csv"><p class="muted">Pehli line mein column naam: ${ALL.map(a=>a[1]).join(', ')}. Account no. pehle se ho toh update hoga, warna naya banega.</p><div id="ir"></div></div>`;
+ <div class="row"><button onclick="exp()">⬇ All customers to Excel (backup)</button><button class="o" onclick="tpl()">Blank Excel format</button></div>
+ <p class="muted">The backup file goes to your computer's Downloads folder. Keep a copy on a pendrive or Google Drive too.</p>
+ <h3>Import from Excel</h3><input type="file" id="xf" accept=".xlsx,.xls,.csv"><p class="muted">First row must have column names: ${ALL.map(a=>a[1]).join(', ')}. If the account no. already exists it is updated, otherwise a new customer is added.</p><div id="ir"></div></div>`;
  $('xf').onchange=imp}
 async function exp(){const X=await xlsx();const rows=CUST.map(c=>Object.fromEntries(ALL.map(([k,l])=>[l,c[k]||''])));const ws=X.utils.json_to_sheet(rows,{header:ALL.map(a=>a[1])});const wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,'Customers');X.writeFile(wb,`passbook-${S.code}-${today()}.xlsx`)}
 async function tpl(){const X=await xlsx();const ws=X.utils.aoa_to_sheet([ALL.map(a=>a[1])]);const wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,'Customers');X.writeFile(wb,'passbook-format.xlsx')}
@@ -170,13 +170,13 @@ const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
 async function imp(ev){const f=ev.target.files[0];if(!f)return;const X=await xlsx();const wb=X.read(await f.arrayBuffer());const js=X.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:'',raw:false});
  const map={};const alias={cust_id:['customerid','custid','cif'],name:['accholder','name','accountholder','customername'],acc_no:['accountno','accno','accountnumber'],joint:['jointholder'],co:['address1co','address1','co','address'],addr2:['address2'],addr3:['address3'],addr4:['statepin','pin','address4'],opened:['openedonddmmyyyy','openedon','opened','openingdate'],operated:['operatedby'],nominee:['nominee'],uid:['uidaadhaarno','uid','aadhaar','aadhar','uidno'],pan:['pannumber','pan'],mobile:['mobileno','mobile','phone']};
  const heads=Object.keys(js[0]||{});for(const[k,al]of Object.entries(alias)){const h=heads.find(h=>al.includes(norm(h)));if(h)map[k]=h}
- if(!map.name&&!map.acc_no)return $('ir').innerHTML='<p style="color:#b42318">Column naam samajh nahi aaye. "Khali Excel format" download karke usi mein bharein.</p>';
+ if(!map.name&&!map.acc_no)return $('ir').innerHTML='<p style="color:#b42318">Column names not recognised. Download "Blank Excel format" and fill your data in it.</p>';
  const byAcc=Object.fromEntries(CUST.filter(c=>c.acc_no).map(c=>[c.acc_no,c.id]));const out=[];
  for(const r of js){const c={};for(const k in map)c[k]=String(r[map[k]]).trim();if(!c.name&&!c.acc_no)continue;if(!c.operated)c.operated='SELF';
   const data={};F.forEach(([k])=>data[k]=c[k]||'');const e={};FE.forEach(([k])=>e[k]=c[k]||'');out.push({id:byAcc[c.acc_no]||crypto.randomUUID(),data,enc:await enc(DK,te.encode(JSON.stringify(e)))})}
- if(!out.length)return toast('Koi row nahi mili');if(!confirm(out.length+' customer import karein?'))return;
- try{for(let i=0;i<out.length;i+=200){$('ir').textContent='Import… '+Math.min(i+200,out.length)+'/'+out.length;await rpc('pb_save',{p_token:S.token,p_rows:out.slice(i,i+200)})}}catch(x){if(x.message!=='stop')toast(x.message);return}
- await loadC();$('ir').innerHTML='<p style="color:#0f7a4a">'+out.length+' customer import ho gaye.</p>'}
+ if(!out.length)return toast('No rows found');if(!confirm(out.length+' customers will be imported. Continue?'))return;
+ try{for(let i=0;i<out.length;i+=200){$('ir').textContent='Importing… '+Math.min(i+200,out.length)+'/'+out.length;await rpc('pb_save',{p_token:S.token,p_rows:out.slice(i,i+200)})}}catch(x){if(x.message!=='stop')toast(x.message);return}
+ await loadC();$('ir').innerHTML='<p style="color:#0f7a4a">'+out.length+' customers imported.</p>'}
 // ---------- boot ----------
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
 (async()=>{if(await restore()){try{await start()}catch(e){}}else loginView()})();
