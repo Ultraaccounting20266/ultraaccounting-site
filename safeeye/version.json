@@ -1,14 +1,14 @@
 {
-  "versionCode": 10,
-  "versionName": "1.0",
+  "versionCode": 11,
+  "versionName": "1.1",
   "apkUrl": "https://ultraaccounting-software.onrender.com/safeeye/SafeEye-ChorPakad.apk",
-  "sha256": "82d1e076a2ec0f5bb7b7f70b44d5e00de16215a37994b5ae2adcfac35791fb92",
-  "size": 7155466,
+  "sha256": "c6d99a103bb593b24d341375203b14804917abba3979cddc336aa79a0cb65fe6",
+  "size": 7156528,
   "minVersion": 0,
   "notes": {
-    "en": "SafeEye 1.0: first full release. In-app updates, language picker, alarm sound for each event.",
-    "hi": "SafeEye 1.0: पहला पूरा वर्ज़न। ऐप में ही अपडेट, भाषा चुनें, हर घटना के लिए अलग अलार्म आवाज़।",
-    "bn": "SafeEye 1.0: প্রথম পূর্ণ ভার্সন। অ্যাপেই আপডেট, ভাষা বাছাই, প্রতিটি ঘটনার জন্য আলাদা অ্যালার্ম আওয়াজ।"
+    "en": "SafeEye 1.1: Yearly ₹299 / Lifetime ₹777 plans, UPI payment.",
+    "hi": "SafeEye 1.1: सालाना ₹299 / लाइफटाइम ₹777 प्लान, UPI पेमेंट।",
+    "bn": "SafeEye 1.1: বার্ষিক ₹299 / লাইফটাইম ₹777 প্ল্যান, UPI পেমেন্ট।"
   },
   "released": "2026-11-20"
 }
