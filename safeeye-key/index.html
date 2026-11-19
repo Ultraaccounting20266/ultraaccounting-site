@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow, noarchive" />
+<meta name="referrer" content="no-referrer" />
+<title>SafeEye – Licence Key (owner only)</title>
+<style>
+  :root { --g:#22c55e; --gd:#166534; --bg:#0b0f0c; --card:#131a15; --t:#e8f5ec; --dim:#9fb3a6; --red:#f87171; --amber:#fbbf24; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--t); font:16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width:620px; margin:0 auto; padding:20px 16px 40px; }
+  h1 { color:var(--g); font-size:22px; margin:0 0 2px; }
+  .sub { color:var(--dim); font-size:13px; margin:0 0 14px; }
+  .card { background:var(--card); border:1px solid var(--gd); border-radius:14px; padding:16px; margin-top:12px; }
+  label { display:block; font-size:14px; color:var(--dim); margin:10px 0 4px; }
+  input[type=text], input[type=date], input[type=tel], input[type=password], input[type=search], select, textarea {
+    width:100%; padding:11px 12px; border-radius:10px; border:1px solid #2a3a2f; background:#0e1410; color:var(--t); font-size:16px; }
+  textarea { font-family: ui-monospace, Menlo, Consolas, monospace; font-size:13px; min-height:96px; word-break:break-all; }
+  #dev { font-family: ui-monospace, Menlo, Consolas, monospace; font-size:20px; letter-spacing:2px; text-transform:uppercase; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; }
+  .row > * { flex:1 1 140px; }
+  button { margin-top:10px; padding:12px 14px; border-radius:12px; border:1px solid var(--gd); background:#18231b; color:var(--g); font-size:16px; font-weight:600; cursor:pointer; width:100%; }
+  button.primary { background:var(--g); color:#04140a; border-color:var(--g); }
+  button.danger { color:var(--red); border-color:#5b1f1f; }
+  button.sm { width:auto; margin-top:6px; padding:7px 10px; font-size:14px; border-radius:9px; }
+  button:disabled { opacity:.5; }
+  .chk { display:flex; gap:8px; align-items:flex-start; margin-top:10px; font-size:14px; color:var(--dim); }
+  .msg { margin-top:10px; font-size:14px; }
+  .ok { color:var(--g); } .err { color:var(--red); } .warn { color:var(--amber); }
+  .small { font-size:12px; color:var(--dim); }
+  .cust { border-top:1px solid #22302a; padding:10px 0; }
+  .cust:first-child { border-top:0; }
+  .cust b { font-size:16px; }
+  .cust .meta { font-size:13px; color:var(--dim); }
+  .cust .k { font-family: ui-monospace, Menlo, Consolas, monospace; font-size:11px; color:var(--dim); word-break:break-all; max-height:2.6em; overflow:hidden; }
+  .badge { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:999px; margin-left:6px; vertical-align:middle; }
+  .b-exp { background:#4c1515; color:#fecaca; } .b-soon { background:#4a3505; color:#fde68a; } .b-reset { background:#1e293b; color:#bfdbfe; }
+</style>
+</head>
+<body>
+<main>
+  <h1>SafeEye – Licence Key</h1>
+  <p class="sub">Sirf owner ke liye · by UltraAccounting. Sab kuch isi browser me hota hai – private key aur customer list kahin upload nahi hoti.</p>
+
+  <div class="card" id="unlockCard" hidden>
+    <b>🔒 Locked</b>
+    <label for="unlockPin">4-digit PIN daalo (yaad rakhi key / customer list kholne ke liye)</label>
+    <input type="password" id="unlockPin" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••" />
+    <button type="button" class="primary" id="unlockBtn">Unlock</button>
+    <div id="unlockMsg" class="msg small"></div>
+  </div>
+
+  <div class="card" id="pinSetCard" hidden>
+    <b>Owner PIN banao</b>
+    <p class="small">Customer list (aur yaad rakhi key) is 4-digit PIN se encrypt hogi. 5 galat PIN par yaad rakhi key mit jaati hai; customer list 30 min ke liye lock hoti hai.</p>
+    <div class="row">
+      <div><label for="pin1">Naya 4-digit PIN</label><input type="password" id="pin1" inputmode="numeric" maxlength="4" autocomplete="new-password" placeholder="••••" /></div>
+      <div><label for="pin2">PIN dobara</label><input type="password" id="pin2" inputmode="numeric" maxlength="4" autocomplete="new-password" placeholder="••••" /></div>
+    </div>
+    <button type="button" class="primary" id="pinSetBtn">PIN set karo</button>
+    <div id="pinSetMsg" class="msg small"></div>
+  </div>
+
+  <div class="card" id="fileCard">
+    <b>1. Private key file</b>
+    <label for="pemFile">private_key.pem chunein (phone storage / laptop se)</label>
+    <input type="file" id="pemFile" accept=".pem,.key,.txt,application/x-pem-file,text/plain" />
+    <div class="chk"><input type="checkbox" id="remember" /><label for="remember" style="margin:0">Yaad rakho – is browser me owner PIN se encrypt karke rakho (shared phone par tick mat karna). Bina tick: key sirf is session ki memory me.</label></div>
+    <div id="keyMsg" class="msg small">Key abhi load nahi hui.</div>
+  </div>
+
+  <div class="card" id="statusCard" hidden>
+    <div id="keyStatus" class="msg ok" style="margin:0"></div>
+    <div class="row">
+      <button type="button" id="lockBtn">Abhi lock karo</button>
+      <button type="button" id="forget" class="danger">Yaad rakhi key mita do</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <b>2. Customer details</b>
+    <div class="row">
+      <div><label for="cname">Customer naam *</label><input type="text" id="cname" autocomplete="off" placeholder="Naam" maxlength="60" /></div>
+      <div><label for="phone">Mobile number *</label><input type="tel" id="phone" inputmode="numeric" placeholder="98XXXXXXXX" maxlength="13" /></div>
+    </div>
+    <label for="dev">Device ID (app me dikhta hai, jaise 7K3QX-9MZ2B) *</label>
+    <input type="text" id="dev" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXXX-XXXXX" maxlength="13" />
+    <div class="row">
+      <div>
+        <label for="plan">Plan</label>
+        <select id="plan">
+          <option value="TRIAL">Trial-extend (7 din)</option>
+          <option value="YEARLY" selected>Yearly (1 saal)</option>
+          <option value="LIFETIME">Lifetime</option>
+          <option value="RESET">PIN Reset Key (sirf aaj)</option>
+        </select>
+      </div>
+      <div>
+        <label for="exp" id="expLbl">Expiry (apne aap)</label>
+        <input type="date" id="exp" />
+      </div>
+    </div>
+    <button type="button" class="primary" id="gen">Generate key</button>
+    <div id="genMsg" class="msg"></div>
+  </div>
+
+  <div class="card" id="outCard" hidden>
+    <b>3. Key</b>
+    <textarea id="out" readonly></textarea>
+    <div class="row">
+      <button type="button" id="copy">Copy</button>
+      <button type="button" class="primary" id="wa">WhatsApp pe bhejo</button>
+    </div>
+    <p class="small">Licence: app → Licence / Buy → paste → Activate. PIN reset: app → PIN bhool gaye? → Seller se reset → paste.</p>
+  </div>
+
+  <div class="card" id="custCard">
+    <b>Customers</b> <span id="custCount" class="small"></span>
+    <div id="custLocked" class="msg small">Customer list dekhne ke liye unlock / PIN set karo.</div>
+    <div id="custBody" hidden>
+      <input type="search" id="search" placeholder="Naam, mobile, Device ID se khojo" style="margin-top:10px" />
+      <div id="custList"></div>
+      <div class="row">
+        <button type="button" id="expEnc">Export (encrypted backup)</button>
+        <button type="button" id="expCsv">Export CSV (plain)</button>
+      </div>
+      <label for="impFile">Import (backup .json ya .csv)</label>
+      <input type="file" id="impFile" accept=".json,.csv,application/json,text/csv,text/plain" />
+      <div id="custMsg" class="msg small"></div>
+      <button type="button" id="wipeCust" class="danger">Customer list mita do</button>
+    </div>
+  </div>
+</main>
+
+<script id="se-core">
+var SECore = (function () {
+  "use strict";
+  var ALPH = /^[0-9A-Z]{10}$/;
+  function normDevice(d) {
+    d = String(d || "").toUpperCase().replace(/[\s-]/g, "");
+    if (!ALPH.test(d)) throw new Error("Device ID 10 akshar/ank ka hona chahiye, jaise 7K3QX-9MZ2B");
+    return d;
+  }
+  function normPlan(p) { return (String(p || "").toUpperCase().replace(/[^A-Z0-9_]/g, "")) || "YEARLY"; }
+  function checkDate(s) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) throw new Error("Expiry date YYYY-MM-DD honi chahiye");
+    var d = new Date(s + "T00:00:00Z");
+    if (isNaN(d) || d.toISOString().slice(0, 10) !== s) throw new Error("Expiry date galat hai");
+    return s;
+  }
+  function b64ToBytes(b64) {
+    var bin = atob(b64), out = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+  function b64url(bytes) {
+    var s = "";
+    for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+    return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+  /** PKCS#8 PEM ("BEGIN PRIVATE KEY") -> DER bytes. */
+  function pemToPkcs8(pem) {
+    pem = String(pem || "");
+    if (/BEGIN (EC |ENCRYPTED )PRIVATE KEY/.test(pem))
+      throw new Error("Ye PKCS#8 nahi hai. tools/make_licence.py wali 'BEGIN PRIVATE KEY' file chahiye (bina password).");
+    var m = pem.match(/-----BEGIN PRIVATE KEY-----([\s\S]+?)-----END PRIVATE KEY-----/);
+    if (!m) throw new Error("PEM file me 'BEGIN PRIVATE KEY' nahi mila");
+    return b64ToBytes(m[1].replace(/[^A-Za-z0-9+/=]/g, ""));
+  }
+  /** WebCrypto ECDSA gives IEEE P1363 r||s (64 bytes); Java SHA256withECDSA wants ASN.1 DER. */
+  function p1363ToDer(rs) {
+    if (rs.length !== 64) throw new Error("Unexpected signature length " + rs.length);
+    function int(b) {
+      var i = 0;
+      while (i < b.length - 1 && b[i] === 0) i++;
+      var v = Array.prototype.slice.call(b, i);
+      if (v[0] & 0x80) v.unshift(0);
+      return [0x02, v.length].concat(v);
+    }
+    var body = int(rs.subarray(0, 32)).concat(int(rs.subarray(32, 64)));
+    return new Uint8Array([0x30, body.length].concat(body));
+  }
+  function importPrivate(subtle, pkcs8) {
+    return subtle.importKey("pkcs8", pkcs8, { name: "ECDSA", namedCurve: "P-256" }, true, ["sign"]);
+  }
+  /**
+   * Returns { key, payload } where key = SE1.<b64url(payload)>.<b64url(DER sig)>
+   * Licence payload: DEVICEID|YYYY-MM-DD|PLAN.  PIN reset payload (plan "RESET"): RESET|DEVICEID|YYYY-MM-DD
+   * (the app accepts a reset key only on that date, once).
+   */
+  async function makeKey(subtle, privKey, device, expiry, plan) {
+    var payloadStr = normPlan(plan) === "RESET"
+      ? "RESET|" + normDevice(device) + "|" + checkDate(expiry)
+      : normDevice(device) + "|" + checkDate(expiry) + "|" + normPlan(plan);
+    var payload = new TextEncoder().encode(payloadStr);
+    var rs = new Uint8Array(await subtle.sign({ name: "ECDSA", hash: "SHA-256" }, privKey, payload));
+    var der = p1363ToDer(rs);
+    // Self-check: verify with the public half of the same key (from its JWK x/y).
+    var jwk = await subtle.exportKey("jwk", privKey);
+    var pub = await subtle.importKey("jwk", { kty: "EC", crv: "P-256", x: jwk.x, y: jwk.y, ext: true },
+      { name: "ECDSA", namedCurve: "P-256" }, true, ["verify"]);
+    var ok = await subtle.verify({ name: "ECDSA", hash: "SHA-256" }, pub, rs, payload);
+    if (!ok) throw new Error("Self-check fail: signature verify nahi hua");
+    var spki = new Uint8Array(await subtle.exportKey("spki", pub));
+    var s = ""; for (var i = 0; i < spki.length; i++) s += String.fromCharCode(spki[i]);
+    return { key: "SE1." + b64url(payload) + "." + b64url(der), payload: payloadStr, publicKeyB64: btoa(s) };
+  }
+  function expiryFor(plan, today) {
+    var d = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
+    if (plan === "LIFETIME") return "2099-12-31";
+    if (plan === "RESET") return d.toISOString().slice(0, 10);   // local "today"
+    if (plan === "TRIAL") d.setUTCDate(d.getUTCDate() + 7);
+    else d.setUTCFullYear(d.getUTCFullYear() + 1);
+    return d.toISOString().slice(0, 10);
+  }
+  // ---- PIN vault: PEM encrypted with AES-GCM-256, key = PBKDF2(PIN, random salt, 200000, SHA-256) ----
+  var PBKDF2_ITER = 200000;
+  function rnd(n) { var b = new Uint8Array(n); globalThis.crypto.getRandomValues(b); return b; }
+  function b64(bytes) { var s = ""; for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]); return btoa(s); }
+  async function pinKey(subtle, pin, salt, iter) {
+    var base = await subtle.importKey("raw", new TextEncoder().encode(pin), "PBKDF2", false, ["deriveKey"]);
+    return subtle.deriveKey({ name: "PBKDF2", salt: salt, iterations: iter, hash: "SHA-256" }, base,
+      { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+  }
+  function validPin(pin) { return /^\d{4}$/.test(String(pin || "")); }
+  /** -> {v,iter,salt,iv,ct,fails} (all base64) ready for localStorage */
+  async function encryptPem(subtle, pem, pin) {
+    if (!validPin(pin)) throw new Error("PIN 4 ank ka hona chahiye");
+    var salt = rnd(16), iv = rnd(12);
+    var k = await pinKey(subtle, pin, salt, PBKDF2_ITER);
+    var ct = new Uint8Array(await subtle.encrypt({ name: "AES-GCM", iv: iv }, k, new TextEncoder().encode(pem)));
+    return { v: 1, iter: PBKDF2_ITER, salt: b64(salt), iv: b64(iv), ct: b64(ct), fails: 0 };
+  }
+  /** Returns the PEM, or null when the PIN is wrong (AES-GCM tag check fails). */
+  async function decryptPem(subtle, blob, pin) {
+    if (!validPin(pin)) return null;
+    try {
+      var k = await pinKey(subtle, pin, b64ToBytes(blob.salt), blob.iter || PBKDF2_ITER);
+      var pt = await subtle.decrypt({ name: "AES-GCM", iv: b64ToBytes(blob.iv) }, k, b64ToBytes(blob.ct));
+      return new TextDecoder().decode(pt);
+    } catch (e) { return null; }
+  }
+
+  // ---- customers helpers (pure) ----
+  async function encryptText(subtle, text, pin) { return encryptPem(subtle, text, pin); }
+  async function decryptText(subtle, blob, pin) { return decryptPem(subtle, blob, pin); }
+  function todayStr(d) { d = d || new Date(); return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())).toISOString().slice(0, 10); }
+  /** days from today to expiry (negative = expired); Infinity for lifetime */
+  function daysLeft(row, today) {
+    if (row.plan === "LIFETIME") return Infinity;
+    return Math.round((Date.parse(row.expiry + "T00:00:00Z") - Date.parse((today || todayStr()) + "T00:00:00Z")) / 86400000);
+  }
+  function sortRows(rows) {
+    return rows.slice().sort(function (a, b) {
+      var x = a.plan === "LIFETIME" ? "9999-12-31" : a.expiry, y = b.plan === "LIFETIME" ? "9999-12-31" : b.expiry;
+      return x < y ? -1 : x > y ? 1 : (a.name || "").localeCompare(b.name || "");
+    });
+  }
+  var CSV_COLS = ["name", "mobile", "device", "plan", "issued", "expiry", "key"];
+  function csvCell(v) { v = String(v == null ? "" : v); if (/^[=+\-@]/.test(v)) v = "'" + v; return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+  function toCSV(rows) {
+    return [CSV_COLS.join(",")].concat(sortRows(rows).map(function (r) {
+      return CSV_COLS.map(function (c) { return csvCell(c === "expiry" && r.plan === "LIFETIME" ? "Lifetime" : r[c]); }).join(",");
+    })).join("\r\n") + "\r\n";
+  }
+  function parseCSV(text) {
+    var rows = [], row = [], cell = "", q = false, i, ch;
+    text = String(text || "").replace(/^\ufeff/, "");
+    for (i = 0; i < text.length; i++) {
+      ch = text[i];
+      if (q) { if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += ch; }
+      else if (ch === '"') q = true;
+      else if (ch === ",") { row.push(cell); cell = ""; }
+      else if (ch === "\n" || ch === "\r") { if (ch === "\r" && text[i + 1] === "\n") i++; row.push(cell); rows.push(row); row = []; cell = ""; }
+      else cell += ch;
+    }
+    if (cell || row.length) { row.push(cell); rows.push(row); }
+    if (!rows.length) return [];
+    var head = rows[0].map(function (h) { return h.trim().toLowerCase(); });
+    return rows.slice(1).filter(function (r) { return r.join("").trim(); }).map(function (r) {
+      var o = {}; head.forEach(function (h, j) { var v = (r[j] || "").trim(); if (v[0] === "'") v = v.slice(1); o[h] = v; });
+      var plan = normPlan(o.plan);
+      return { name: o.name || "", mobile: o.mobile || "", device: (o.device || "").toUpperCase(), plan: plan,
+               issued: o.issued || "", expiry: plan === "LIFETIME" ? "2099-12-31" : (o.expiry || ""), key: o.key || "" };
+    });
+  }
+  /** merge b into a, de-duplicated by key (or device+plan+expiry when no key) */
+  function mergeRows(a, b) {
+    var seen = {}, out = [];
+    a.concat(b).forEach(function (r) {
+      var k = r.key || (r.device + "|" + r.plan + "|" + r.expiry);
+      if (!seen[k]) { seen[k] = 1; out.push(r); }
+    });
+    return out;
+  }
+
+  return { encryptText: encryptText, decryptText: decryptText, todayStr: todayStr, daysLeft: daysLeft, sortRows: sortRows,
+           toCSV: toCSV, parseCSV: parseCSV, mergeRows: mergeRows,
+           encryptPem: encryptPem, decryptPem: decryptPem, validPin: validPin, PBKDF2_ITER: PBKDF2_ITER,
+           normDevice: normDevice, normPlan: normPlan, pemToPkcs8: pemToPkcs8, p1363ToDer: p1363ToDer,
+           importPrivate: importPrivate, makeKey: makeKey, expiryFor: expiryFor, b64url: b64url };
+})();
+if (typeof module !== "undefined") module.exports = SECore;
+</script>
+
+<script>
+(function () {
+  "use strict";
+  var LS_VAULT = "safeeye_owner_vault_v1";     // encrypted private key (optional)
+  var LS_CUST = "safeeye_owner_customers_v1";  // encrypted customer list
+  var LS_FAILS = "safeeye_owner_fails_v1";     // {n, lockUntil}
+  var MAX_FAILS = 5, LOCK_MS = 30 * 60 * 1000, IDLE_MS = 10 * 60 * 1000;
+  var $ = function (id) { return document.getElementById(id); };
+  var subtle = window.crypto && window.crypto.subtle;
+  var privKey = null, sessionPin = null, customers = null, lastKey = "", lastRow = null, idleTimer = null;
+  try { localStorage.removeItem("safeeye_owner_pem"); } catch (e) {}  // very old plain format
+
+  function msg(el, text, cls) { el.textContent = text; el.className = "msg " + (cls || ""); }
+  function getJ(k) { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } }
+  function setJ(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+  function del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+  function fails() { return getJ(LS_FAILS) || { n: 0, lockUntil: 0 }; }
+  function lockLeft() { var l = fails().lockUntil - Date.now(); return l > 0 ? Math.min(l, LOCK_MS) : 0; }
+  function clearOutput() { lastKey = ""; lastRow = null; $("out").value = ""; $("outCard").hidden = true; msg($("genMsg"), ""); }
+
+  function show() {
+    var v = getJ(LS_VAULT), c = getJ(LS_CUST);
+    var locked = !sessionPin && !!(v || c);
+    $("unlockCard").hidden = !locked;
+    $("pinSetCard").hidden = !!sessionPin || locked;
+    $("fileCard").hidden = !!privKey || (!!v && locked);
+    $("statusCard").hidden = !privKey;
+    $("forget").hidden = !v;
+    $("gen").disabled = !privKey || !subtle;
+    $("custLocked").hidden = !!customers;
+    $("custBody").hidden = !customers;
+    $("custCount").textContent = customers ? "(" + customers.length + ")" : "";
+    renderCustomers();
+  }
+
+  // ---------- idle auto-lock ----------
+  function armIdle() {
+    clearTimeout(idleTimer);
+    if (privKey || sessionPin) idleTimer = setTimeout(function () { lock("10 min kuch nahi kiya – lock ho gaya."); }, IDLE_MS);
+  }
+  ["pointerdown", "keydown", "touchstart", "scroll"].forEach(function (ev) {
+    document.addEventListener(ev, function () { if (privKey || sessionPin) armIdle(); }, { passive: true });
+  });
+  function lock(reason) {
+    privKey = null; sessionPin = null; customers = null; clearOutput();
+    ["unlockPin", "pin1", "pin2"].forEach(function (id) { $(id).value = ""; });
+    $("custList").textContent = "";
+    if (reason) msg((getJ(LS_VAULT) || getJ(LS_CUST)) ? $("unlockMsg") : $("keyMsg"), reason, "warn");
+    show();
+  }
+
+  // ---------- encrypted storage ----------
+  async function saveCustomers() {
+    if (!sessionPin || !customers) throw new Error("Pehle PIN set / unlock karo");
+    setJ(LS_CUST, await SECore.encryptText(subtle, JSON.stringify(customers), sessionPin));
+  }
+  async function saveVault(pem) { setJ(LS_VAULT, await SECore.encryptPem(subtle, pem, sessionPin)); }
+
+  async function useKey(pem, label) {
+    privKey = await SECore.importPrivate(subtle, SECore.pemToPkcs8(pem));
+    var jwk = await subtle.exportKey("jwk", privKey);
+    msg($("keyStatus"), label + " Pehchan: " + jwk.x.slice(0, 8) + "… · 10 min idle par auto-lock.", "ok");
+  }
+
+  if (!subtle) msg($("keyMsg"), "Is browser me WebCrypto nahi hai. Page https par kholo (Chrome).", "err");
+
+  // ---------- set PIN (first time) ----------
+  $("pinSetBtn").addEventListener("click", async function () {
+    var a = $("pin1").value, b = $("pin2").value;
+    if (!SECore.validPin(a)) { msg($("pinSetMsg"), "PIN 4 ank ka hona chahiye.", "err"); return; }
+    if (a !== b) { msg($("pinSetMsg"), "Dono PIN alag hain.", "err"); return; }
+    sessionPin = a; customers = customers || [];
+    $("pin1").value = ""; $("pin2").value = "";
+    try { await saveCustomers(); msg($("pinSetMsg"), ""); } catch (e) { msg($("pinSetMsg"), e.message, "err"); }
+    armIdle(); show();
+  });
+
+  // ---------- private key file ----------
+  $("remember").addEventListener("change", function () {
+    if (this.checked && !sessionPin) msg($("keyMsg"), "Yaad rakhne ke liye pehle upar owner PIN set karo / unlock karo.", "warn");
+  });
+  $("pemFile").addEventListener("change", function (ev) {
+    var f = ev.target.files && ev.target.files[0];
+    ev.target.value = "";
+    if (!f || !subtle) return;
+    var remember = $("remember").checked;
+    if (remember && !sessionPin) { msg($("keyMsg"), "Pehle owner PIN set karo / unlock karo, phir file chuno.", "err"); return; }
+    var r = new FileReader();
+    r.onload = async function () {
+      var pem = String(r.result);
+      try {
+        await useKey(pem, remember ? "Key load hui aur PIN se encrypt karke yaad rakhi gayi." : "Key load hui (sirf is session me).");
+        if (remember) await saveVault(pem);
+        msg($("keyMsg"), "");
+      } catch (e) { privKey = null; msg($("keyMsg"), e.message || String(e), "err"); }
+      pem = null; armIdle(); show();
+    };
+    r.readAsText(f);
+  });
+
+  // ---------- unlock ----------
+  async function unlock() {
+    var v = getJ(LS_VAULT), c = getJ(LS_CUST);
+    if (!v && !c) { show(); return; }
+    var wait = lockLeft();
+    if (wait) { msg($("unlockMsg"), "Bahut galat PIN. " + Math.ceil(wait / 60000) + " min baad koshish karo.", "err"); return; }
+    var pin = $("unlockPin").value;
+    $("unlockBtn").disabled = true; msg($("unlockMsg"), "Check ho raha hai…", "small");
+    var pem = v ? await SECore.decryptPem(subtle, v, pin) : null;
+    var ctext = c ? await SECore.decryptText(subtle, c, pin) : null;
+    $("unlockBtn").disabled = false; $("unlockPin").value = "";
+    if ((v && pem === null) || (c && ctext === null)) {
+      var fl = fails(); fl.n = (fl.n || 0) + 1;
+      if (fl.n >= MAX_FAILS) {
+        del(LS_VAULT); $("remember").checked = false;
+        setJ(LS_FAILS, { n: 0, lockUntil: Date.now() + LOCK_MS });
+        msg($("unlockMsg"), "5 baar galat PIN – yaad rakhi key mita di gayi (master key file dobara chuno). Customer list 30 min ke liye lock.", "err");
+        msg($("keyMsg"), "Yaad rakhi key mita di gayi. File dobara chuno.", "err");
+        show(); return;
+      }
+      setJ(LS_FAILS, fl);
+      msg($("unlockMsg"), "Galat PIN. " + (MAX_FAILS - fl.n) + " koshish baaki" + (v ? ", phir yaad rakhi key mit jayegi." : "."), "err");
+      return;
+    }
+    del(LS_FAILS);
+    sessionPin = pin;
+    try {
+      customers = ctext ? JSON.parse(ctext) : [];
+      if (pem) await useKey(pem, "Unlock ho gaya.");
+      if (!c) await saveCustomers();
+      msg($("unlockMsg"), "");
+    } catch (e) { msg($("unlockMsg"), e.message || String(e), "err"); }
+    pem = null; ctext = null; armIdle(); show();
+  }
+  $("unlockBtn").addEventListener("click", unlock);
+  $("unlockPin").addEventListener("keydown", function (e) { if (e.key === "Enter") unlock(); });
+
+  $("forget").addEventListener("click", function () {
+    del(LS_VAULT); $("remember").checked = false; privKey = null; clearOutput();
+    msg($("keyMsg"), "Yaad rakhi key mita di. Dobara file chunein.", "warn"); show();
+  });
+  $("lockBtn").addEventListener("click", function () { lock("Lock kar diya."); });
+
+  // ---------- generate ----------
+  function setExpiry() {
+    var reset = $("plan").value === "RESET";
+    $("exp").value = SECore.expiryFor($("plan").value, new Date());
+    $("exp").readOnly = reset;
+    $("expLbl").textContent = reset ? "Date (sirf aaj valid)" : "Expiry (apne aap)";
+  }
+  $("plan").addEventListener("change", setExpiry);
+  setExpiry();
+  $("dev").addEventListener("input", function () {
+    var v = this.value.toUpperCase().replace(/[^0-9A-Z]/g, "").slice(0, 10);
+    this.value = v.length > 5 ? v.slice(0, 5) + "-" + v.slice(5) : v;
+  });
+  function mobile10(v) { var p = String(v || "").replace(/\D/g, ""); if (p.length === 12 && p.slice(0, 2) === "91") p = p.slice(2); return p; }
+  function waUrl(mobile, text) { var p = mobile10(mobile); return "https://wa.me/" + (p.length === 10 ? "91" + p : "") + "?text=" + encodeURIComponent(text); }
+
+  $("gen").addEventListener("click", async function () {
+    $("outCard").hidden = true;
+    if (!privKey) { msg($("genMsg"), "Pehle key load / unlock karo.", "err"); return; }
+    var name = $("cname").value.trim(), mob = mobile10($("phone").value);
+    if (!name) { msg($("genMsg"), "Customer ka naam daalo.", "err"); return; }
+    if (mob.length !== 10) { msg($("genMsg"), "10 ank ka mobile number daalo.", "err"); return; }
+    if (!sessionPin || !customers) { msg($("genMsg"), "Customer list save karne ke liye pehle owner PIN set karo / unlock karo.", "err"); return; }
+    try {
+      var plan = $("plan").value;
+      var r = await SECore.makeKey(subtle, privKey, $("dev").value, $("exp").value, plan);
+      lastKey = r.key;
+      lastRow = { name: name, mobile: mob, device: SECore.normDevice($("dev").value), plan: plan,
+                  issued: SECore.todayStr(), expiry: $("exp").value, key: r.key };
+      customers.push(lastRow);
+      await saveCustomers();
+      $("out").value = r.key; $("outCard").hidden = false;
+      msg($("genMsg"), "Key ban gayi aur customer list me save hui: " + r.payload, "ok");
+      show();
+    } catch (e) { msg($("genMsg"), e.message || String(e), "err"); }
+  });
+
+  function copyText(t, el) {
+    var done = function () { msg(el, "Copy ho gaya.", "ok"); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, function () { msg(el, "Copy nahi hua – key ko daba ke select karo.", "err"); });
+    else { $("out").select(); document.execCommand("copy"); done(); }
+  }
+  $("copy").addEventListener("click", function () { copyText(lastKey, $("genMsg")); });
+  $("wa").addEventListener("click", function () {
+    if (!lastRow) return;
+    var text = lastRow.plan === "RESET"
+      ? "Aapki SafeEye PIN reset key (sirf aaj valid, ek baar):\n" + lastKey + "\n\nApp kholein → PIN bhool gaye? → 2. Seller se reset → key paste karein → naya PIN banayein."
+      : "Aapki SafeEye licence key:\n" + lastKey + "\n\nApp kholein → Licence / Buy → key paste karein → Activate.";
+    window.open(waUrl(lastRow.mobile, text), "_blank", "noopener");
+  });
+
+  // ---------- customers list ----------
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function planLabel(p) { return { TRIAL: "Trial-extend", YEARLY: "Yearly", LIFETIME: "Lifetime", RESET: "PIN reset" }[p] || p; }
+  function renderCustomers() {
+    var list = $("custList"); list.textContent = "";
+    if (!customers) return;
+    var q = $("search").value.trim().toLowerCase(), today = SECore.todayStr();
+    var rows = SECore.sortRows(customers).filter(function (r) {
+      return !q || [r.name, r.mobile, r.device, planLabel(r.plan)].join(" ").toLowerCase().indexOf(q.replace(/-/g, "")) >= 0 ||
+        [r.name, r.mobile, r.device].join(" ").toLowerCase().indexOf(q) >= 0;
+    });
+    if (!rows.length) { list.appendChild(el("p", "small", customers.length ? "Kuch nahi mila." : "Abhi koi customer nahi.")); return; }
+    rows.forEach(function (r) {
+      var d = SECore.daysLeft(r, today), box = el("div", "cust"), title = el("div");
+      title.appendChild(el("b", null, r.name || "(naam nahi)"));
+      if (r.plan === "RESET") title.appendChild(el("span", "badge b-reset", "PIN reset"));
+      else if (d < 0) title.appendChild(el("span", "badge b-exp", "Expired"));
+      else if (d <= 7) title.appendChild(el("span", "badge b-soon", "7 din mein khatam"));
+      box.appendChild(title);
+      var dev = r.device && r.device.length === 10 ? r.device.slice(0, 5) + "-" + r.device.slice(5) : r.device;
+      box.appendChild(el("div", "meta", "📱 " + r.mobile + " · ID " + dev + " · " + planLabel(r.plan)));
+      box.appendChild(el("div", "meta", "Issue: " + (r.issued || "-") + " · " + (r.plan === "RESET" ? "Date: " : "Expiry: ") + (r.plan === "LIFETIME" ? "Lifetime" : r.expiry)));
+      box.appendChild(el("div", "k", r.key));
+      var bar = el("div", "row");
+      var c = el("button", "sm", "Copy key"); c.type = "button";
+      c.addEventListener("click", function () { copyText(r.key, $("custMsg")); });
+      var w = el("button", "sm primary", "WhatsApp"); w.type = "button";
+      w.addEventListener("click", function () {
+        var text;
+        if (r.plan === "LIFETIME") text = "Namaste " + r.name + ", SafeEye – Chor Pakad (UltraAccounting). Aapka Lifetime licence chalu hai. Koi madad chahiye to batayein. Device ID: " + dev;
+        else if (r.plan === "RESET") text = "Namaste " + r.name + ", SafeEye – Chor Pakad (UltraAccounting). Device ID: " + dev + ". Koi aur madad chahiye to batayein.";
+        else text = "Namaste " + r.name + ", aapka SafeEye – Chor Pakad licence " + r.expiry + (d < 0 ? " ko khatam ho gaya hai." : " ko khatam ho raha hai.") +
+          " Renew karne ke liye is message ka reply karein. Device ID: " + dev + " · UltraAccounting";
+        window.open(waUrl(r.mobile, text), "_blank", "noopener");
+      });
+      var x = el("button", "sm danger", "Hatao"); x.type = "button";
+      x.addEventListener("click", async function () {
+        if (!confirm("Is customer row ko hatana hai? (" + r.name + ")")) return;
+        customers = customers.filter(function (o) { return o !== r; });
+        try { await saveCustomers(); } catch (e) { msg($("custMsg"), e.message, "err"); }
+        show();
+      });
+      bar.appendChild(c); bar.appendChild(w); bar.appendChild(x);
+      box.appendChild(bar);
+      list.appendChild(box);
+    });
+  }
+  $("search").addEventListener("input", renderCustomers);
+
+  function download(name, text, type) {
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], { type: type }));
+    a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+  $("expEnc").addEventListener("click", async function () {
+    if (!customers) return;
+    var blob = await SECore.encryptText(subtle, JSON.stringify(customers), sessionPin);
+    download("safeeye-customers-" + SECore.todayStr() + ".json",
+      JSON.stringify({ type: "safeeye-customers-backup", v: 1, created: new Date().toISOString(), blob: blob }), "application/json");
+    msg($("custMsg"), "Encrypted backup bana – isi owner PIN se khulega.", "ok");
+  });
+  $("expCsv").addEventListener("click", function () {
+    if (!customers) return;
+    if (!confirm("CSV file encrypted nahi hoti – isme saari keys aur mobile number saaf dikhte hain. Phir bhi banaye?")) return;
+    download("safeeye-customers-" + SECore.todayStr() + ".csv", "\ufeff" + SECore.toCSV(customers), "text/csv");
+  });
+  $("impFile").addEventListener("change", function (ev) {
+    var f = ev.target.files && ev.target.files[0]; ev.target.value = "";
+    if (!f || !customers) return;
+    var r = new FileReader();
+    r.onload = async function () {
+      var text = String(r.result), rows = null;
+      try {
+        if (/^\s*\{/.test(text)) {
+          var j = JSON.parse(text);
+          if (j.type !== "safeeye-customers-backup" || !j.blob) throw new Error("Ye SafeEye backup file nahi hai");
+          var pt = await SECore.decryptText(subtle, j.blob, sessionPin);
+          if (pt === null) {
+            var other = prompt("Ye backup kisi aur PIN se bana hai. Us backup ka 4-digit PIN daalo:") || "";
+            pt = await SECore.decryptText(subtle, j.blob, other);
+          }
+          if (pt === null) throw new Error("Backup ka PIN galat hai");
+          rows = JSON.parse(pt);
+        } else rows = SECore.parseCSV(text);
+        var before = customers.length;
+        customers = SECore.mergeRows(customers, rows.filter(function (o) { return o && (o.key || o.device); }));
+        await saveCustomers();
+        msg($("custMsg"), "Import ho gaya: " + (customers.length - before) + " naye customer jude.", "ok");
+      } catch (e) { msg($("custMsg"), e.message || String(e), "err"); }
+      show();
+    };
+    r.readAsText(f);
+  });
+  $("wipeCust").addEventListener("click", async function () {
+    if (!confirm("Poori customer list mitani hai? Pehle Export (backup) kar lena.")) return;
+    customers = [];
+    try { await saveCustomers(); } catch (e) {}
+    msg($("custMsg"), "Customer list khali kar di.", "warn"); show();
+  });
+
+  show();
+})();
+</script>
+</body>
+</html>
