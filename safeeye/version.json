@@ -1,0 +1,14 @@
+{
+  "versionCode": 10,
+  "versionName": "1.0",
+  "apkUrl": "https://ultraaccounting-software.onrender.com/safeeye/SafeEye-ChorPakad.apk",
+  "sha256": "82d1e076a2ec0f5bb7b7f70b44d5e00de16215a37994b5ae2adcfac35791fb92",
+  "size": 7155466,
+  "minVersion": 0,
+  "notes": {
+    "en": "SafeEye 1.0: first full release. In-app updates, language picker, alarm sound for each event.",
+    "hi": "SafeEye 1.0: पहला पूरा वर्ज़न। ऐप में ही अपडेट, भाषा चुनें, हर घटना के लिए अलग अलार्म आवाज़।",
+    "bn": "SafeEye 1.0: প্রথম পূর্ণ ভার্সন। অ্যাপেই আপডেট, ভাষা বাছাই, প্রতিটি ঘটনার জন্য আলাদা অ্যালার্ম আওয়াজ।"
+  },
+  "released": "2026-11-20"
+}
